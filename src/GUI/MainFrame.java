@@ -6,11 +6,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame {
-    private Menu menu;
 
     public MainFrame() {
         super("Library Menagement System");
         super.setLayout(new BorderLayout());
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+        JPanel bookPanel = new BookPanel();
+        tabbedPane.add("Book",bookPanel);
+        JPanel publisherPanel = new PublisherPanel();
+        tabbedPane.add("Publisher", publisherPanel);
+        JPanel studentPanel = new StudentPanel();
+        tabbedPane.add("Student",studentPanel);
+        super.add(tabbedPane);
 
         String message = "Welcome to the Library System. Please select the action you would like to perform from the Library menu.";
         JOptionPane.showMessageDialog(new JFrame(), message, "Info", 1);
