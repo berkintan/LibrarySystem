@@ -1,14 +1,14 @@
 package GUI;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class BookPanel extends JPanel {
-    private JButton okBtn;
-    private JButton addBtn;
-    private JButton deleteBtn;
-    private JButton changeBtn;
+    private BookTopPanel bookTopPanel;
+    private BookBottomPanel bookBottomPanel;
 
     public BookPanel() {
-
+        bookTopPanel = new BookTopPanel();
+        this.add(bookTopPanel);
     }
 }

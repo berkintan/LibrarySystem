@@ -20,9 +20,6 @@ public class MainFrame extends JFrame {
         tabbedPane.add("Student",studentPanel);
         super.add(tabbedPane);
 
-        String message = "Welcome to the Library System. Please select the action you would like to perform from the Library menu.";
-        JOptionPane.showMessageDialog(new JFrame(), message, "Info", 1);
-
         setJMenuBar(createMenuBar());
         super.setSize(650,500);
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
