@@ -1,12 +1,15 @@
 package Model;
 
+import java.util.ArrayList;
+
 public class Book {
     private String nameOftheBook;
     private String author;
-    private Publisher publisher;
+    private String publisher;
     private int numberOfPages;
+//    private ArrayList<Book> booksList = new ArrayList<>();
 
-    public Book(String nameofTheBook, String author, int numberOfPages, Publisher publisher) {
+    public Book(String nameofTheBook, String author, int numberOfPages, String publisher) {
         this.publisher = publisher;
         this.nameOftheBook = nameofTheBook;
         this.author = author;
@@ -19,5 +22,9 @@ public class Book {
         this.numberOfPages = numberOfPages;
 
         System.out.println("The info has been changed successfully.");
+    }
+
+    public String toString() {
+        return "Info: " + this.nameOftheBook + " " + this.author + " " + this.author + " " + this.numberOfPages;
     }
 }
