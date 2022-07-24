@@ -7,7 +7,6 @@ public class Book {
     private String author;
     private String publisher;
     private int numberOfPages;
-//    private ArrayList<Book> booksList = new ArrayList<>();
 
     public Book(String nameofTheBook, String author, int numberOfPages, String publisher) {
         this.publisher = publisher;
@@ -16,15 +15,36 @@ public class Book {
         this.numberOfPages = numberOfPages;
     }
 
-    public void updateBook(String nameOftheBook, String author, int numberOfPages) {
+    public String getNameOftheBook() {
+        return nameOftheBook;
+    }
+
+    public void setNameOftheBook(String nameOftheBook) {
         this.nameOftheBook = nameOftheBook;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public int getNumberOfPages() {
+        return numberOfPages;
+    }
+
+    public void setNumberOfPages(int numberOfPages) {
         this.numberOfPages = numberOfPages;
-
-        System.out.println("The info has been changed successfully.");
     }
 
-    public String toString() {
-        return "Info: " + this.nameOftheBook + " " + this.author + " " + this.author + " " + this.numberOfPages;
-    }
 }

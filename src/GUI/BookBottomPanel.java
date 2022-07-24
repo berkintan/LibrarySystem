@@ -3,13 +3,15 @@ package GUI;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import Model.*;
 
-public class BookBottomPanel extends JPanel{
+public class BookBottomPanel extends JPanel {
     private JButton okBtn;
     private Book book;
     private ArrayList<Book> books = new ArrayList<>();
+    private JTable table;
 
     public BookBottomPanel() {
         this.setLayout(new BorderLayout());
@@ -19,7 +21,7 @@ public class BookBottomPanel extends JPanel{
         this.removeAll();
         this.repaint();
         this.revalidate();
-        JPanel panel = new JPanel(new GridLayout(5,2));
+        JPanel panel = new JPanel(new GridLayout(5, 2));
         JTextField bookName = new JTextField();
         JTextField author = new JTextField();
         JTextField publisher = new JTextField();
@@ -38,7 +40,7 @@ public class BookBottomPanel extends JPanel{
         this.add(panel);
 
         addBtn.addActionListener(e -> {
-            if(bookName.getText().isEmpty() || author.getText().isEmpty() || publisher.getText().isEmpty()
+            if (bookName.getText().isEmpty() || author.getText().isEmpty() || publisher.getText().isEmpty()
                     || numberofPages.getText().isEmpty()) {
                 String error = "Please fill all of the information for the book!";
                 JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
@@ -58,15 +60,61 @@ public class BookBottomPanel extends JPanel{
             }
         });
     }
+
     public void listBooks() {
-        if(books.size() == 0) {
+        if (books.size() == 0) {
             String error = "There are no added books. Please add books to list!";
             JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
         } else {
-            for (int i = 0; i < books.size() - 1; i++) {
-                System.out.println(book.toString());
+            this.removeAll();
+            this.repaint();
+            this.revalidate();
+            JPanel panel = new JPanel(new GridLayout(books.size() + 1, 4));
+            JLabel name = new JLabel("Name");
+            JLabel author = new JLabel("Author");
+            JLabel publisher = new JLabel("Publisher");
+            JLabel numberofpages = new JLabel("Number Of Pages");
+            name.setForeground(Color.RED);
+            author.setForeground(Color.RED);
+            numberofpages.setForeground(Color.RED);
+            publisher.setForeground(Color.RED);
+            panel.add(name);
+            panel.add(author);
+            panel.add(publisher);
+            panel.add(numberofpages);
+            for (int i = 0; i < books.size(); i++) {
+                panel.add(new JLabel(String.valueOf(books.get(i).getNameOftheBook())));
+                panel.add(new JLabel(String.valueOf(books.get(i).getAuthor())));
+                panel.add(new JLabel(String.valueOf(books.get(i).getPublisher())));
+                panel.add(new JLabel(String.valueOf(books.get(i).getNumberOfPages())));
             }
+            this.add(panel);
+        }
+    }
+
+    public void changeBookInfo() {
+        if(books.size() == 0) {
+            String error = "There are no added books. Please add a book to change book info!";
+            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
+        } else {
+            this.removeAll();
+            this.repaint();
+            this.revalidate();
+            JPanel panel = new JPanel(new FlowLayout());
+            String[] headers = {"Name", "Author", "Publisher", "Number of Pages"};
+            Object[][] bookInfo = new Object[books.size()][4];
+            for(int j = 0; j < books.size(); j++) {
+                    bookInfo[j][0] = books.get(j).getNameOftheBook();
+                    bookInfo[j][1] = books.get(j).getAuthor();
+                    bookInfo[j][2] = books.get(j).getPublisher();
+                    bookInfo[j][3] = String.valueOf(books.get(j).getNumberOfPages());
+            }
+            table = new JTable(bookInfo, headers);
+            JScrollPane scrollPane = new JScrollPane(table);
+            panel.add(scrollPane);
+            this.add(panel);
         }
     }
 }
+
 
