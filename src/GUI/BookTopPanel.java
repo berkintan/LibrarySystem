@@ -43,5 +43,9 @@ public class BookTopPanel extends JPanel {
         changeBtn.addActionListener(e -> {
             this.bookBottomPanel.changeBookInfo();
         });
+
+        deleteBtn.addActionListener(e -> {
+            this.bookBottomPanel.deleteBook();
+        });
     }
 }
