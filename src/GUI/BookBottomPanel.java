@@ -1,9 +1,7 @@
 package GUI;
 
 import javax.swing.*;
-import javax.swing.event.MenuDragMouseEvent;
-import javax.swing.event.MenuDragMouseListener;
-import javax.swing.event.TableModelListener;
+import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -97,6 +95,7 @@ public class BookBottomPanel extends JPanel {
 //                panel.add(new JLabel(String.valueOf(books.get(i).getNumberOfPages())));
 //            }
 //            this.add(panel);
+
             this.removeAll();
             this.repaint();
             this.revalidate();
@@ -134,11 +133,58 @@ public class BookBottomPanel extends JPanel {
                     bookInfo[j][2] = books.get(j).getPublisher();
                     bookInfo[j][3] = String.valueOf(books.get(j).getNumberOfPages());
             }
-            table = new JTable(bookInfo, headers);
-            table.setEnabled(false); // Can not select items, for not-chane purposes...
+            tablemodel = new DefaultTableModel(bookInfo,headers);
+            table = new JTable(tablemodel);
+            table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
-            panel.add(scrollPane);
-            this.add(panel);
+            panel.add(scrollPane, BorderLayout.NORTH);
+
+            this.add(panel, BorderLayout.CENTER);
+
+            JPanel newPanel = new JPanel();
+            newPanel.setLayout(new GridLayout(5,2));
+            JTextField newbookname = new JTextField();
+            JTextField newauthorname = new JTextField();
+            JTextField newpageno = new JTextField();
+            JTextField newpublisher = new JTextField();
+            JButton change = new JButton("Change Book Info");
+            newPanel.add(new JLabel("Name of the book"));
+            newPanel.add(newbookname);
+            newPanel.add(new JLabel("Name of the author: "));
+            newPanel.add(newauthorname);
+            newPanel.add(new JLabel("Name of the publisher: "));
+            newPanel.add(newpublisher);
+            newPanel.add(new JLabel("Number of pages: "));
+            newPanel.add(newpageno);
+            newPanel.add(new JLabel());
+            newPanel.add(change);
+            this.add(newPanel, BorderLayout.NORTH);
+
+            table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    int i = table.getSelectedRow();
+                    newbookname.setText((String) tablemodel.getValueAt(i,0));
+                    newauthorname.setText((String) tablemodel.getValueAt(i,1));
+                    newpublisher.setText((String) tablemodel.getValueAt(i,2));
+                    newpageno.setText((String) tablemodel.getValueAt(i,3));
+                }
+            });
+
+            change.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int i = table.getSelectedRow();
+                    tablemodel.setValueAt(newbookname.getText(),i,0);
+                    tablemodel.setValueAt(newauthorname.getText(),i,1);
+                    tablemodel.setValueAt(newpublisher.getText(),i,2);
+                    tablemodel.setValueAt(newpageno.getText(),i,3);
+                    book.setNameOftheBook(newbookname.getText());
+                    book.setAuthor(newauthorname.getText());
+                    book.setPublisher(newpublisher.getText());
+                    book.setNumberOfPages(Integer.parseInt(newpageno.getText()));
+                }
+            });
         }
     }
 
@@ -170,11 +216,12 @@ public class BookBottomPanel extends JPanel {
             this.add(panel, BorderLayout.CENTER);
 
             deletebutton.addActionListener(e -> {
-                if(table.getSelectedRow() != -1) {
-                    tablemodel.removeRow(table.getSelectedRow());
-                    JOptionPane.showMessageDialog(null, "Deleted successfully");
-                    books.remove(table.getSelectedRow() + 1);
-                }
+                    if (table.getSelectedRow() != -1) {
+                        tablemodel.removeRow(table.getSelectedRow());
+                        JOptionPane.showMessageDialog(null, "Book Deleted Successfully!");
+                        books.remove(table.getSelectedRow() + 1);
+                    }
+
             });
 
 
