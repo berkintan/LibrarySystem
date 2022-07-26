@@ -1,7 +1,5 @@
 package Model;
 
-import java.util.ArrayList;
-
 public class Book {
     private String nameOftheBook;
     private String author;

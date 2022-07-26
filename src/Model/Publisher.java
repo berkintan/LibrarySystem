@@ -18,7 +18,6 @@ public class Publisher {
     public void addBook(Book book) {
         books.add(book);
     }
-
     public ArrayList<Book> getBooks() {
         return this.books;
     }

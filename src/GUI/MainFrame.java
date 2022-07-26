@@ -30,6 +30,7 @@ public class MainFrame extends JFrame {
 
         JMenu menu = new JMenu("Library");
         JMenuItem item1 = new JMenuItem("Exit");
+        JMenuItem item2 = new JMenuItem("Info");
 
         item1.addActionListener(new ActionListener() {
             @Override
@@ -37,6 +38,14 @@ public class MainFrame extends JFrame {
                 System.exit(0);
             }
         });
+
+        item2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null,"This program is written by Berkin Tan for EHSIM Internship...");
+            }
+        });
+        menu.add(item2);
         menu.add(item1);
         menuBar.add(menu);
 

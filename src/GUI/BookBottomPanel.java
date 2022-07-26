@@ -1,16 +1,15 @@
 package GUI;
 
+import Model.Book;
+
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
-
-import Model.*;
 
 public class BookBottomPanel extends JPanel {
     private JButton okBtn;
@@ -72,30 +71,6 @@ public class BookBottomPanel extends JPanel {
             String error = "There are no added books. Please add books to list!";
             JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
         } else {
-//            this.removeAll();
-//            this.repaint();
-//            this.revalidate();
-//            JPanel panel = new JPanel(new GridLayout(books.size() + 1, 4));
-//            JLabel name = new JLabel("Name");
-//            JLabel author = new JLabel("Author");
-//            JLabel publisher = new JLabel("Publisher");
-//            JLabel numberofpages = new JLabel("Number Of Pages");
-//            name.setForeground(Color.RED);
-//            author.setForeground(Color.RED);
-//            numberofpages.setForeground(Color.RED);
-//            publisher.setForeground(Color.RED);
-//            panel.add(name);
-//            panel.add(author);
-//            panel.add(publisher);
-//            panel.add(numberofpages);
-//            for (int i = 0; i < books.size(); i++) {
-//                panel.add(new JLabel(String.valueOf(books.get(i).getNameOftheBook())));
-//                panel.add(new JLabel(String.valueOf(books.get(i).getAuthor())));
-//                panel.add(new JLabel(String.valueOf(books.get(i).getPublisher())));
-//                panel.add(new JLabel(String.valueOf(books.get(i).getNumberOfPages())));
-//            }
-//            this.add(panel);
-
             this.removeAll();
             this.repaint();
             this.revalidate();
@@ -128,10 +103,10 @@ public class BookBottomPanel extends JPanel {
             String[] headers = {"Name", "Author", "Publisher", "Number of Pages"};
             Object[][] bookInfo = new Object[books.size()][4];
             for(int j = 0; j < books.size(); j++) {
-                    bookInfo[j][0] = books.get(j).getNameOftheBook();
-                    bookInfo[j][1] = books.get(j).getAuthor();
-                    bookInfo[j][2] = books.get(j).getPublisher();
-                    bookInfo[j][3] = String.valueOf(books.get(j).getNumberOfPages());
+                bookInfo[j][0] = books.get(j).getNameOftheBook();
+                bookInfo[j][1] = books.get(j).getAuthor();
+                bookInfo[j][2] = books.get(j).getPublisher();
+                bookInfo[j][3] = String.valueOf(books.get(j).getNumberOfPages());
             }
             tablemodel = new DefaultTableModel(bookInfo,headers);
             table = new JTable(tablemodel);
@@ -216,11 +191,11 @@ public class BookBottomPanel extends JPanel {
             this.add(panel, BorderLayout.CENTER);
 
             deletebutton.addActionListener(e -> {
-                    if (table.getSelectedRow() != -1) {
-                        tablemodel.removeRow(table.getSelectedRow());
-                        JOptionPane.showMessageDialog(null, "Book Deleted Successfully!");
-                        books.remove(table.getSelectedRow() + 1);
-                    }
+                if (table.getSelectedRow() != -1) {
+                    tablemodel.removeRow(table.getSelectedRow());
+                    JOptionPane.showMessageDialog(null, "Book Deleted Successfully!");
+                    books.remove(table.getSelectedRow() + 1);
+                }
 
             });
 
@@ -228,5 +203,3 @@ public class BookBottomPanel extends JPanel {
         }
     }
 }
-
-
