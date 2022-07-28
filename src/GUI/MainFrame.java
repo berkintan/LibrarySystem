@@ -14,8 +14,8 @@ public class MainFrame extends JFrame {
         JTabbedPane tabbedPane = new JTabbedPane();
         JPanel bookPanel = new BookPanel();
         tabbedPane.add("Book",bookPanel);
-        JPanel publisherPanel = new PublisherPanel();
-        tabbedPane.add("Publisher", publisherPanel);
+//        JPanel publisherPanel = new PublisherPanel();
+//        tabbedPane.add("Publisher", publisherPanel);
         JPanel studentPanel = new StudentPanel();
         tabbedPane.add("Student",studentPanel);
         super.add(tabbedPane);

@@ -12,7 +12,7 @@ public class BookTopPanel extends JPanel {
     private JButton addBtn;
     private JButton deleteBtn;
     private JButton listBtn;
-    private BookBottomPanel bookBottomPanel;
+    protected static BookBottomPanel bookBottomPanel;
 
 
     public BookTopPanel() {

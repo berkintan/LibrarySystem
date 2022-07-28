@@ -8,11 +8,14 @@ public class Publisher {
     private String phoneNumber;
     private ArrayList<Book> books = new ArrayList<>();
 
+    public Publisher(String nameofThePublisher) {
+        this.nameofThePublisher = nameofThePublisher;
+    }
+
     public Publisher(String nameofThePublisher, String address, String phoneNumber) {
         this.nameofThePublisher = nameofThePublisher;
         this.address = address;
         this.phoneNumber = phoneNumber;
-
     }
 
     public void addBook(Book book) {

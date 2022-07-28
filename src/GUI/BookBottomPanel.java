@@ -12,14 +12,17 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class BookBottomPanel extends JPanel {
-    private JButton okBtn;
     private Book book;
-    private ArrayList<Book> books = new ArrayList<>();
+    private static ArrayList<Book> books;
     private JTable table;
     private DefaultTableModel tablemodel;
 
     public BookBottomPanel() {
         this.setLayout(new BorderLayout());
+        books = new ArrayList<>();
+    }
+    public BookBottomPanel(StudentBottomPanel studentBottomPanel) {
+
     }
 
     public void addBook() {
@@ -201,5 +204,8 @@ public class BookBottomPanel extends JPanel {
 
 
         }
+    }
+    public ArrayList<Book> getBooks() {
+        return books;
     }
 }
