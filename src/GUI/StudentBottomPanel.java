@@ -66,56 +66,60 @@ public class StudentBottomPanel extends JPanel {
         });
     }
     public void borrowBook() {
-        JFrame frame = new JFrame("Borrow Book Section");
-        frame.setSize(1000,525);
-        frame.setLayout(new FlowLayout());
-        JPanel panel1 = new JPanel();
-        bookBottomPanel = new BookBottomPanel(this);
-        String[] headers = {"Name", "Author", "Publisher", "Number of Pages"};
-        Object[][] bookInfo = new Object[bookBottomPanel.getBooks().size()][4];
-        for(int j = 0; j < bookBottomPanel.getBooks().size(); j++) {
-            bookInfo[j][0] = bookBottomPanel.getBooks().get(j).getNameOftheBook();
-            bookInfo[j][1] = bookBottomPanel.getBooks().get(j).getAuthor();
-            bookInfo[j][2] = bookBottomPanel.getBooks().get(j).getPublisher();
-            bookInfo[j][3] = String.valueOf(bookBottomPanel.getBooks().get(j).getNumberOfPages());
+        if(students.size() == 0) {
+            String error = "Please add students to the system!";
+            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
+        } else {
+            JFrame frame = new JFrame("Borrow Book Section");
+            frame.setSize(1000, 525);
+            frame.setLayout(new FlowLayout());
+            JPanel panel1 = new JPanel();
+            bookBottomPanel = new BookBottomPanel(this);
+            String[] headers = {"Name", "Author", "Publisher", "Number of Pages"};
+            Object[][] bookInfo = new Object[bookBottomPanel.getBooks().size()][4];
+            for (int j = 0; j < bookBottomPanel.getBooks().size(); j++) {
+                bookInfo[j][0] = bookBottomPanel.getBooks().get(j).getNameOftheBook();
+                bookInfo[j][1] = bookBottomPanel.getBooks().get(j).getAuthor();
+                bookInfo[j][2] = bookBottomPanel.getBooks().get(j).getPublisher();
+                bookInfo[j][3] = String.valueOf(bookBottomPanel.getBooks().get(j).getNumberOfPages());
+            }
+            table = new JTable(bookInfo, headers);
+            JScrollPane scrollPane = new JScrollPane(table);
+            panel1.add(scrollPane);
+            frame.add(panel1);
+
+            JPanel panel2 = new JPanel();
+            String[] headers1 = {"Name", "Surname", "Student ID"};
+            Object[][] studentInfo1 = new Object[students.size()][3];
+            for (int j = 0; j < students.size(); j++) {
+                studentInfo1[j][0] = students.get(j).getName();
+                studentInfo1[j][1] = students.get(j).getSurname();
+                studentInfo1[j][2] = String.valueOf(students.get(j).getStudentID());
+            }
+            table1 = new JTable(studentInfo1, headers1);
+            JScrollPane scrollPane1 = new JScrollPane(table1);
+            panel2.add(scrollPane1);
+            frame.add(panel2);
+            JButton borrowButton = new JButton("Borrow");
+            frame.add(borrowButton);
+            frame.setVisible(true);
+
+            borrowButton.addActionListener(e -> {
+                int i = table.getSelectedRow();
+                String name = (String) table.getValueAt(i, 0);
+                String author = (String) table.getValueAt(i, 1);
+                String publisher = (String) table.getValueAt(i, 2);
+                int numberofpages = Integer.parseInt(String.valueOf(table.getValueAt(i, 3)));
+                i = table1.getSelectedRow();
+                String studentname = (String) table1.getValueAt(i, 0);
+                String studentsurname = (String) table1.getValueAt(i, 1);
+                int studentID = Integer.parseInt(String.valueOf(table1.getValueAt(i, 2)));
+                borrow = new Borrow(name, author, publisher, numberofpages, studentname, studentsurname, studentID);
+                borrowedBooks.add(borrow);
+                String message = "Done!";
+                JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
+            });
         }
-        table = new JTable(bookInfo, headers);
-        JScrollPane scrollPane = new JScrollPane(table);
-        panel1.add(scrollPane);
-        frame.add(panel1);
-
-        JPanel panel2 = new JPanel();
-        String[] headers1 = {"Name", "Surname", "Student ID"};
-        Object[][] studentInfo1 = new Object[students.size()][3];
-        for(int j = 0; j < students.size(); j++) {
-            studentInfo1[j][0] = students.get(j).getName();
-            studentInfo1[j][1] = students.get(j).getSurname();
-            studentInfo1[j][2] = String.valueOf(students.get(j).getStudentID());
-        }
-        table1 = new JTable(studentInfo1, headers1);
-        JScrollPane scrollPane1 = new JScrollPane(table1);
-        panel2.add(scrollPane1);
-        frame.add(panel2);
-        JButton borrowButton = new JButton("Borrow");
-        frame.add(borrowButton);
-        frame.setVisible(true);
-
-        borrowButton.addActionListener(e -> {
-            int i = table.getSelectedRow();
-            String name = (String) table.getValueAt(i,0);
-            String author = (String) table.getValueAt(i, 1);
-            String publisher = (String) table.getValueAt(i,2);
-            int numberofpages = Integer.parseInt(String.valueOf(table.getValueAt(i,3)));
-            i = table1.getSelectedRow();
-            String studentname = (String) table1.getValueAt(i,0);
-            String studentsurname = (String) table1.getValueAt(i,1);
-            int studentID = Integer.parseInt(String.valueOf(table1.getValueAt(i,2)));
-            borrow = new Borrow(name,author,publisher,numberofpages,studentname,studentsurname,studentID);
-            borrowedBooks.add(borrow);
-            String message = "Done!";
-            JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
-        });
-
     }
     public void listBorrowedBooks() {
         if(borrowedBooks.size() == 0) {
