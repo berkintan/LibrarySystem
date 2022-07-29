@@ -138,15 +138,12 @@ public class BookBottomPanel extends JPanel {
             newPanel.add(change);
             this.add(newPanel, BorderLayout.NORTH);
 
-            table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    int i = table.getSelectedRow();
-                    newbookname.setText((String) tablemodel.getValueAt(i,0));
-                    newauthorname.setText((String) tablemodel.getValueAt(i,1));
-                    newpublisher.setText((String) tablemodel.getValueAt(i,2));
-                    newpageno.setText((String) tablemodel.getValueAt(i,3));
-                }
+            table.getSelectionModel().addListSelectionListener(e -> {
+                int i = table.getSelectedRow();
+                newbookname.setText((String) tablemodel.getValueAt(i,0));
+                newauthorname.setText((String) tablemodel.getValueAt(i,1));
+                newpublisher.setText((String) tablemodel.getValueAt(i,2));
+                newpageno.setText((String) tablemodel.getValueAt(i,3));
             });
 
             change.addActionListener(new ActionListener() {

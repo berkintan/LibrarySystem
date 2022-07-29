@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 
 public class StudentTopPanel extends JPanel {
     private JButton addStudent;
+    private JButton borrowedBooklist;
     private JButton changeStudentInfo;
     private JButton deleteStudent;
     private JButton borrowBook;
@@ -20,11 +21,13 @@ public class StudentTopPanel extends JPanel {
         deleteStudent = new JButton("Delete Student");
         listStudent = new JButton("List Students");
         borrowBook = new JButton("Borrow Book");
+        borrowedBooklist = new JButton("Borrowed Book List");
         buttons.add(addStudent);
         buttons.add(changeStudentInfo);
         buttons.add(deleteStudent);
         buttons.add(listStudent);
         buttons.add(borrowBook);
+        buttons.add(borrowedBooklist);
         this.add(buttons);
 
         this.studentBottomPanel = new StudentBottomPanel();
@@ -40,6 +43,10 @@ public class StudentTopPanel extends JPanel {
 
         listStudent.addActionListener(e -> {
             studentBottomPanel.listStudents();
+        });
+
+        borrowedBooklist.addActionListener(e -> {
+            studentBottomPanel.listBorrowedBooks();
         });
     }
 }

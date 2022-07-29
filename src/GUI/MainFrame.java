@@ -21,7 +21,7 @@ public class MainFrame extends JFrame {
         super.add(tabbedPane);
 
         setJMenuBar(createMenuBar());
-        super.setSize(800,800);
+        super.setSize(1200,600);
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
         super.setVisible(true);
     }
