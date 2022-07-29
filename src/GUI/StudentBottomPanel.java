@@ -162,12 +162,109 @@ public class StudentBottomPanel extends JPanel {
                 studentInfo[j][2] = String.valueOf(students.get(j).getStudentID());
             }
             table = new JTable(studentInfo, headers);
-            table.setPreferredScrollableViewportSize(table.getPreferredSize());
-            table.setFillsViewportHeight(true);
             table.setEnabled(false); // Can not select items, for not-change purposes...
             JScrollPane scrollPane = new JScrollPane(table);
             panel.add(scrollPane);
             this.add(panel);
+        }
+    }
+    public void changeStudentInfo() {
+        if(students.size() == 0) {
+            String error = "There are no students. Please add students!";
+            JOptionPane.showMessageDialog(new JFrame(), error, "Error",0);
+        } else {
+            this.removeAll();
+            this.repaint();
+            this.revalidate();
+            JPanel panel = new JPanel(new FlowLayout());
+            String[] headers = {"Name", "Surname", "Student ID"};
+            Object[][] studentInfo = new Object[students.size()][3];
+            for(int j = 0; j < students.size(); j++) {
+                studentInfo[j][0] = students.get(j).getName();
+                studentInfo[j][1] = students.get(j).getSurname();
+                studentInfo[j][2] = String.valueOf(students.get(j).getStudentID());
+            }
+            tablemodel = new DefaultTableModel(studentInfo, headers);
+            table = new JTable(tablemodel);
+            table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane scrollPane = new JScrollPane(table);
+            panel.add(scrollPane, BorderLayout.NORTH);
+
+            this.add(panel, BorderLayout.CENTER);
+
+            JPanel newPanel = new JPanel();
+            newPanel.setLayout(new GridLayout(4,2));
+            JTextField newstudentname = new JTextField();
+            JTextField newstudentsurname = new JTextField();
+            JTextField newstudentid = new JTextField();
+            JButton change = new JButton("Change Student Info");
+            newPanel.add(new JLabel("Name of the Student: "));
+            newPanel.add(newstudentname);
+            newPanel.add(new Label("Surname of the Student: "));
+            newPanel.add(newstudentsurname);
+            newPanel.add(new JLabel("Student ID: "));
+            newPanel.add(newstudentid);
+            newPanel.add(new JLabel(""));
+            newPanel.add(change);
+            this.add(newPanel, BorderLayout.NORTH);
+
+            table.getSelectionModel().addListSelectionListener(e -> {
+                int i = table.getSelectedRow();
+                newstudentname.setText((String) tablemodel.getValueAt(i,0));
+                newstudentsurname.setText((String) tablemodel.getValueAt(i,1));
+                newstudentid.setText((String) tablemodel.getValueAt(i,2));
+            });
+
+            change.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int i = table.getSelectedRow();
+                    tablemodel.setValueAt(newstudentname.getText(),i,0);
+                    tablemodel.setValueAt(newstudentsurname.getText(),i,1);
+                    tablemodel.setValueAt(newstudentid.getText(),i,2);
+                    student.setName(newstudentname.getText());
+                    student.setSurname(newstudentsurname.getText());
+                    student.setStudentID(String.valueOf(Integer.parseInt(newstudentid.getText())));
+                }
+            });
+        }
+    }
+    public void deleteStudent() {
+        if(students.size() == 0) {
+            String error = "There are no students!";
+            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
+        } else {
+            this.removeAll();
+            this.repaint();
+            this.revalidate();
+            JPanel panel = new JPanel(new BorderLayout());
+            String[] headers = {"Name", "Surname", "Student ID"};
+            Object[][] bookInfo = new Object[students.size()][3];
+            for(int j = 0; j < students.size(); j++) {
+                bookInfo[j][0] = students.get(j).getName();
+                bookInfo[j][1] = students.get(j).getSurname();
+                bookInfo[j][2] = String.valueOf(students.get(j).getStudentID());
+            }
+            tablemodel = new DefaultTableModel(bookInfo,headers);
+            table = new JTable(tablemodel);
+            table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane scrollPane = new JScrollPane(table);
+            panel.add(scrollPane, BorderLayout.NORTH);
+
+            JButton deletebutton = new JButton("Delete Selected Student");
+            panel.add(deletebutton);
+            this.add(panel, BorderLayout.CENTER);
+
+            deletebutton.addActionListener(e -> {
+                if (table.getSelectedRow() != -1) {
+                    tablemodel.removeRow(table.getSelectedRow());
+                    JOptionPane.showMessageDialog(null, "Student Deleted Successfully!");
+                    students.remove(table.getSelectedRow() + 1);
+                }
+
+            });
+
+
         }
     }
 }

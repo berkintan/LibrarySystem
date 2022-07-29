@@ -48,5 +48,13 @@ public class StudentTopPanel extends JPanel {
         borrowedBooklist.addActionListener(e -> {
             studentBottomPanel.listBorrowedBooks();
         });
+
+        changeStudentInfo.addActionListener(e -> {
+            studentBottomPanel.changeStudentInfo();
+        });
+
+        deleteStudent.addActionListener(e -> {
+            studentBottomPanel.deleteStudent();
+        });
     }
 }
