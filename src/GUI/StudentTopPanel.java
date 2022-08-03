@@ -1,8 +1,7 @@
 package GUI;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
 public class StudentTopPanel extends JPanel {
     private JButton addStudent;
@@ -42,7 +41,11 @@ public class StudentTopPanel extends JPanel {
         });
 
         listStudent.addActionListener(e -> {
-            studentBottomPanel.listStudents();
+            try {
+                studentBottomPanel.listStudents();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         });
 
         borrowedBooklist.addActionListener(e -> {
