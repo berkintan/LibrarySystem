@@ -7,6 +7,7 @@ import Model.Student;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.State;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +24,8 @@ public class StudentBottomPanel extends JPanel {
     private JTable table1;
     private DefaultTableModel tablemodel;
     private JDBC connection = new JDBC();
+    private ResultSet rs;
+    private Statement statement;
     public StudentBottomPanel() {
         this.setLayout(new BorderLayout());
     }
@@ -158,26 +161,7 @@ public class StudentBottomPanel extends JPanel {
         }
     }
     public void listStudents() throws SQLException {
-            this.removeAll();
-            this.repaint();
-            this.revalidate();
-            JPanel panel = new JPanel(new FlowLayout());
-            Connection con = connection.connection();
-            Statement st = con.createStatement();
-            String sql = "SELECT * FROM student";
-            ResultSet rs = st.executeQuery(sql);
-            tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID"}, 0);
-            while(rs.next()) {
-                String a = rs.getString("student_name");
-                String b = rs.getString("student_surname");
-                String c = rs.getString("student_number");
-                tablemodel.addRow(new Object[]{a,b,c});
-            }
-            table = new JTable(tablemodel);
-            table.setEnabled(false); // Can not select items, for not-change purposes...
-            JScrollPane scrollPane = new JScrollPane(table);
-            panel.add(scrollPane);
-            this.add(panel);
+            createTable();
     }
     public void changeStudentInfo() {
         if(students.size() == 0) {
@@ -240,23 +224,34 @@ public class StudentBottomPanel extends JPanel {
             });
         }
     }
-    public void deleteStudent() {
-        if(students.size() == 0) {
-            String error = "There are no students!";
-            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
+    public void deleteStudent() throws SQLException {
+        Connection connection1 = connection.connection();
+        statement = connection1.createStatement();
+        String query = "SELECT COUNT (*) FROM student";
+        rs = statement.executeQuery(query);
+        int size = 0;
+        while (rs.next()){
+            size = rs.getInt(1);
+        }
+        if(size == 0) {
+            String error = "Please add students!";
+            JOptionPane.showMessageDialog(new JFrame(),error,"Error!",0);
         } else {
             this.removeAll();
             this.repaint();
             this.revalidate();
             JPanel panel = new JPanel(new BorderLayout());
-            String[] headers = {"Name", "Surname", "Student ID"};
-            Object[][] bookInfo = new Object[students.size()][3];
-            for(int j = 0; j < students.size(); j++) {
-                bookInfo[j][0] = students.get(j).getName();
-                bookInfo[j][1] = students.get(j).getSurname();
-                bookInfo[j][2] = String.valueOf(students.get(j).getStudentID());
+            Connection con = connection.connection();
+            Statement st = con.createStatement();
+            String sql = "SELECT * FROM student";
+            ResultSet rs = st.executeQuery(sql);
+            tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID"}, 0);
+            while (rs.next()) {
+                String a = rs.getString("student_name");
+                String b = rs.getString("student_surname");
+                String c = rs.getString("student_number");
+                tablemodel.addRow(new Object[]{a, b, c});
             }
-            tablemodel = new DefaultTableModel(bookInfo,headers);
             table = new JTable(tablemodel);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
@@ -268,14 +263,41 @@ public class StudentBottomPanel extends JPanel {
 
             deletebutton.addActionListener(e -> {
                 if (table.getSelectedRow() != -1) {
-                    tablemodel.removeRow(table.getSelectedRow());
-                    JOptionPane.showMessageDialog(null, "Student Deleted Successfully!");
-                    students.remove(table.getSelectedRow() + 1);
+                    try {
+                        String student_id = (String) tablemodel.getValueAt(table.getSelectedRow(), 2);
+                        PreparedStatement pt = con.prepareStatement("DELETE FROM student WHERE student_number = ?");
+                        pt.setInt(1, Integer.parseInt(student_id));
+                        pt.executeUpdate();
+                        pt.close();
+                        JOptionPane.showMessageDialog(null, "Student Deleted Successfully!");
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
                 }
 
             });
-
-
         }
+        }
+    public void createTable() throws SQLException {
+        this.removeAll();
+        this.repaint();
+        this.revalidate();
+        JPanel panel = new JPanel(new FlowLayout());
+        Connection con = connection.connection();
+        statement = con.createStatement();
+        String sql = "SELECT * FROM student";
+        rs = statement.executeQuery(sql);
+        tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID"}, 0);
+        while(rs.next()) {
+            String a = rs.getString("student_name");
+            String b = rs.getString("student_surname");
+            String c = rs.getString("student_number");
+            tablemodel.addRow(new Object[]{a,b,c});
+        }
+        table = new JTable(tablemodel);
+        table.setEnabled(false); // Can not select items, for not-change purposes...
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane);
+        this.add(panel);
     }
 }
