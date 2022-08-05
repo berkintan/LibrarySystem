@@ -53,7 +53,11 @@ public class StudentTopPanel extends JPanel {
         });
 
         changeStudentInfo.addActionListener(e -> {
-            studentBottomPanel.changeStudentInfo();
+            try {
+                studentBottomPanel.changeStudentInfo();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         });
 
         deleteStudent.addActionListener(e -> {

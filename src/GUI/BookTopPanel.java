@@ -1,11 +1,7 @@
 package GUI;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import Model.*;
+import java.sql.SQLException;
 
 public class BookTopPanel extends JPanel {
     private JButton changeBtn;
@@ -29,23 +25,35 @@ public class BookTopPanel extends JPanel {
         buttons.add(listBtn);
         this.add(buttons);
 
-        this.bookBottomPanel = new BookBottomPanel();
+        bookBottomPanel = new BookBottomPanel();
         this.add(bookBottomPanel);
 
         addBtn.addActionListener(e -> {
-            this.bookBottomPanel.addBook();
+            bookBottomPanel.addBook();
         });
 
         listBtn.addActionListener(e -> {
-            this.bookBottomPanel.listBooks();
+            try {
+                bookBottomPanel.listBooks();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         });
 
         changeBtn.addActionListener(e -> {
-            this.bookBottomPanel.changeBookInfo();
+            try {
+                bookBottomPanel.changeBookInfo();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         deleteBtn.addActionListener(e -> {
-            this.bookBottomPanel.deleteBook();
+            try {
+                bookBottomPanel.deleteBook();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
     }
 }

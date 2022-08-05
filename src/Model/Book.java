@@ -4,9 +4,9 @@ public class Book {
     private String nameOftheBook;
     private String author;
     private String publisher;
-    private int numberOfPages;
+    private String numberOfPages;
 
-    public Book(String nameofTheBook, String author, int numberOfPages, String publisher) {
+    public Book(String nameofTheBook, String author, String numberOfPages, String publisher) {
         this.publisher = publisher;
         this.nameOftheBook = nameofTheBook;
         this.author = author;
@@ -37,11 +37,11 @@ public class Book {
         this.publisher = publisher;
     }
 
-    public int getNumberOfPages() {
+    public String getNumberOfPages() {
         return numberOfPages;
     }
 
-    public void setNumberOfPages(int numberOfPages) {
+    public void setNumberOfPages(String numberOfPages) {
         this.numberOfPages = numberOfPages;
     }
 

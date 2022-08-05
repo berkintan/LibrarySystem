@@ -1,5 +1,6 @@
 package GUI;
 
+import Controller.JDBC;
 import Model.Book;
 
 import javax.swing.*;
@@ -7,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class BookBottomPanel extends JPanel {
@@ -14,6 +16,9 @@ public class BookBottomPanel extends JPanel {
     private static ArrayList<Book> books;
     private JTable table;
     private DefaultTableModel tablemodel;
+    private JDBC connection = new JDBC();
+    private Statement statement;
+    private ResultSet rs;
 
     public BookBottomPanel() {
         this.setLayout(new BorderLayout());
@@ -52,39 +57,57 @@ public class BookBottomPanel extends JPanel {
                 JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
             } else {
                 try {
-                    String pageNO = numberofPages.getText();
-                    int page = Integer.parseInt(pageNO);
-                    book = new Book(bookName.getText(), author.getText(), page, publisher.getText());
+                    Connection con = connection.connection();
+                    String s = "INSERT INTO book(book_name,book_author,book_publisher,book_numberofpages) VALUES (?,?,?,?)";
+                    PreparedStatement pt = con.prepareStatement(s);
+                    book = new Book(bookName.getText(), author.getText(), numberofPages.getText(), publisher.getText());
+                    pt.setString(1,book.getNameOftheBook());
+                    pt.setString(2,book.getAuthor());
+                    pt.setString(3,book.getPublisher());
+                    pt.setString(4,book.getNumberOfPages());
+                    pt.executeUpdate();
                     String message = "Book added successfully!";
                     JOptionPane.showMessageDialog(new JFrame(), message, "Done!", 1);
-                    books.add(book);
-
                 } catch (NumberFormatException error) {
                     JOptionPane.showMessageDialog(new JFrame(), "Please enter a number for the " +
                             "\"Number of pages\" section!!!!!", "Error!", 0);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             }
         });
     }
 
-    public void listBooks() {
-        if (books.size() == 0) {
-            String error = "There are no added books. Please add books to list!";
-            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
+    public void listBooks() throws SQLException {
+        Connection connection1 = connection.connection();
+        statement = connection1.createStatement();
+        String query = "SELECT COUNT (*) FROM book";
+        rs = statement.executeQuery(query);
+        int size = 0;
+        while (rs.next()) {
+            size = rs.getInt(1);
+        }
+        if (size == 0) {
+            String error = "Please add students!";
+            JOptionPane.showMessageDialog(new JFrame(), error, "Error!", 0);
         } else {
             this.removeAll();
             this.repaint();
             this.revalidate();
             JPanel panel = new JPanel(new FlowLayout());
-            String[] headers = {"Name", "Author", "Publisher", "Number of Pages"};
-            Object[][] bookInfo = new Object[books.size()][4];
-            for(int j = 0; j < books.size(); j++) {
-                bookInfo[j][0] = books.get(j).getNameOftheBook();
-                bookInfo[j][1] = books.get(j).getAuthor();
-                bookInfo[j][2] = books.get(j).getPublisher();
-                bookInfo[j][3] = String.valueOf(books.get(j).getNumberOfPages());
+            Connection con = connection.connection();
+            statement = con.createStatement();
+            String sql = "SELECT * FROM book";
+            ResultSet rs = statement.executeQuery(sql);
+            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages"}, 0);
+            while (rs.next()) {
+                String a = rs.getString("book_name");
+                String b = rs.getString("book_author");
+                String c = rs.getString("book_publisher");
+                String d = rs.getString("book_numberofpages");
+                tablemodel.addRow(new Object[]{a, b, c, d});
             }
-            table = new JTable(bookInfo, headers);
+            table = new JTable(tablemodel);
             table.setEnabled(false); // Can not select items, for not-chane purposes...
             JScrollPane scrollPane = new JScrollPane(table);
             panel.add(scrollPane);
@@ -92,24 +115,36 @@ public class BookBottomPanel extends JPanel {
         }
     }
 
-    public void changeBookInfo() {
-        if(books.size() == 0) {
-            String error = "There are no added books. Please add a book to change book info!";
-            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
+
+    public void changeBookInfo() throws SQLException {
+        Connection connection1 = connection.connection();
+        statement = connection1.createStatement();
+        String query = "SELECT COUNT (*) FROM book";
+        rs = statement.executeQuery(query);
+        int size = 0;
+        while (rs.next()){
+            size = rs.getInt(1);
+        }
+        if(size == 0) {
+            String error = "Please add books!";
+            JOptionPane.showMessageDialog(new JFrame(),error,"Error!",0);
         } else {
             this.removeAll();
             this.repaint();
             this.revalidate();
             JPanel panel = new JPanel(new FlowLayout());
-            String[] headers = {"Name", "Author", "Publisher", "Number of Pages"};
-            Object[][] bookInfo = new Object[books.size()][4];
-            for(int j = 0; j < books.size(); j++) {
-                bookInfo[j][0] = books.get(j).getNameOftheBook();
-                bookInfo[j][1] = books.get(j).getAuthor();
-                bookInfo[j][2] = books.get(j).getPublisher();
-                bookInfo[j][3] = String.valueOf(books.get(j).getNumberOfPages());
+            Connection con = connection.connection();
+            statement = con.createStatement();
+            String sql = "SELECT * FROM book";
+            ResultSet rs = statement.executeQuery(sql);
+            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages"}, 0);
+            while (rs.next()) {
+                String a = rs.getString("book_name");
+                String b = rs.getString("book_author");
+                String c = rs.getString("book_publisher");
+                String d = rs.getString("book_numberofpages");
+                tablemodel.addRow(new Object[]{a, b, c, d});
             }
-            tablemodel = new DefaultTableModel(bookInfo,headers);
             table = new JTable(tablemodel);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
@@ -144,41 +179,69 @@ public class BookBottomPanel extends JPanel {
                 newpageno.setText((String) tablemodel.getValueAt(i,3));
             });
 
-            change.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    int i = table.getSelectedRow();
-                    tablemodel.setValueAt(newbookname.getText(),i,0);
-                    tablemodel.setValueAt(newauthorname.getText(),i,1);
-                    tablemodel.setValueAt(newpublisher.getText(),i,2);
-                    tablemodel.setValueAt(newpageno.getText(),i,3);
-                    book.setNameOftheBook(newbookname.getText());
-                    book.setAuthor(newauthorname.getText());
-                    book.setPublisher(newpublisher.getText());
-                    book.setNumberOfPages(Integer.parseInt(newpageno.getText()));
+            change.addActionListener(e -> {
+                int i = table.getSelectedRow();
+                String oldbookname = (String) tablemodel.getValueAt(i,0); // new change
+                tablemodel.setValueAt(newbookname.getText(),i,0);
+                tablemodel.setValueAt(newauthorname.getText(),i,1);
+                tablemodel.setValueAt(newpublisher.getText(),i,2);
+                tablemodel.setValueAt(newpageno.getText(),i,3);
+                try {
+                    String bookname = (String) table.getValueAt(i, 0);
+                    Connection connection3 = connection.connection();
+                    statement = connection3.createStatement();
+                    PreparedStatement preparedStatement = connection3.prepareStatement("SELECT book_id FROM book where book_name = ?");
+                    preparedStatement.setString(1, oldbookname); // changed the parameter to oldbookname
+                    ResultSet result = preparedStatement.executeQuery();
+                    int value = 0;
+                    while (result.next()) {
+                        value = ((Number) result.getObject(1)).intValue();
+                    }
+                    Connection connection2 = connection.connection();
+                    PreparedStatement pt = connection2.prepareStatement("UPDATE book SET book_name = ?, book_author = ?, book_publisher = ?, book_numberofpages = ? WHERE book_id = ?");
+                    pt.setString(1, (String) table.getValueAt(i,0));
+                    pt.setString(2, (String) table.getValueAt(i,1));
+                    pt.setString(3, (String) table.getValueAt(i,2));
+                    pt.setString(4, (String) table.getValueAt(i,3));
+                    pt.setInt(5, value);
+                    pt.executeUpdate();
+                    pt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             });
         }
     }
 
-    public void deleteBook() {
-        if(books.size() == 0) {
-            String error = "There are no books added!";
-            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
+    public void deleteBook() throws SQLException {
+        Connection connection1 = connection.connection();
+        statement = connection1.createStatement();
+        String query = "SELECT COUNT (*) FROM book";
+        rs = statement.executeQuery(query);
+        int size = 0;
+        while (rs.next()){
+            size = rs.getInt(1);
+        }
+        if(size == 0) {
+            String error = "Please add books!";
+            JOptionPane.showMessageDialog(new JFrame(),error,"Error!",0);
         } else {
             this.removeAll();
             this.repaint();
             this.revalidate();
-            JPanel panel = new JPanel(new BorderLayout());
-            String[] headers = {"Name", "Author", "Publisher", "Number of Pages"};
-            Object[][] bookInfo = new Object[books.size()][4];
-            for(int j = 0; j < books.size(); j++) {
-                bookInfo[j][0] = books.get(j).getNameOftheBook();
-                bookInfo[j][1] = books.get(j).getAuthor();
-                bookInfo[j][2] = books.get(j).getPublisher();
-                bookInfo[j][3] = String.valueOf(books.get(j).getNumberOfPages());
+            JPanel panel = new JPanel(new FlowLayout());
+            Connection con = connection.connection();
+            statement = con.createStatement();
+            String sql = "SELECT * FROM book";
+            ResultSet rs = statement.executeQuery(sql);
+            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages"}, 0);
+            while (rs.next()) {
+                String a = rs.getString("book_name");
+                String b = rs.getString("book_author");
+                String c = rs.getString("book_publisher");
+                String d = rs.getString("book_numberofpages");
+                tablemodel.addRow(new Object[]{a, b, c, d});
             }
-            tablemodel = new DefaultTableModel(bookInfo,headers);
             table = new JTable(tablemodel);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
@@ -190,9 +253,16 @@ public class BookBottomPanel extends JPanel {
 
             deletebutton.addActionListener(e -> {
                 if (table.getSelectedRow() != -1) {
-                    tablemodel.removeRow(table.getSelectedRow());
+                    String book_name = (String) tablemodel.getValueAt(table.getSelectedRow(), 0);
+                    try {
+                    PreparedStatement pt = con.prepareStatement("DELETE FROM book WHERE book_name = ?");
+                    pt.setString(1, book_name);
+                    pt.executeUpdate();
+                    pt.close();
                     JOptionPane.showMessageDialog(null, "Book Deleted Successfully!");
-                    books.remove(table.getSelectedRow() + 1);
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
                 }
 
             });

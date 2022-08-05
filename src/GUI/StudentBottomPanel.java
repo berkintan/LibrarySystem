@@ -5,14 +5,13 @@ import Model.Borrow;
 import Model.Student;
 
 import javax.swing.*;
-import javax.swing.plaf.nimbus.State;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StudentBottomPanel extends JPanel {
     private Student student;
@@ -49,29 +48,26 @@ public class StudentBottomPanel extends JPanel {
         panel.add(add);
         this.add(panel);
 
-        add.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(studentName .getText().isEmpty() || studentSurname.getText().isEmpty() || studentID.getText().isEmpty()) {
-                    String error = "Please fill all of the information for student.";
-                    JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
-                } else {
-                    try {
-                        Connection con = connection.connection();
-                        String s = "INSERT INTO student(student_name,student_surname,student_number) VALUES (?,?,?)";
-                        PreparedStatement pt = con.prepareStatement(s);
-                        pt.setString(1,studentName.getText());
-                        pt.setString(2, studentSurname.getText());
-                        pt.setInt(3, Integer.parseInt(studentID.getText()));
-                        pt.executeUpdate();
-                        String message = "Student added successfully!";
-                        JOptionPane.showMessageDialog(new JFrame(), message, "Success", 1);
-                    }catch (NumberFormatException error) {
-                        String error1 = "Please type a number for the Student ID section.";
-                        JOptionPane.showMessageDialog(new JFrame(), error1, "Error", 0);
-                    } catch (SQLException ex) {
-                        throw new RuntimeException(ex);
-                    }
+        add.addActionListener(e -> {
+            if(studentName .getText().isEmpty() || studentSurname.getText().isEmpty() || studentID.getText().isEmpty()) {
+                String error = "Please fill all of the information for student.";
+                JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
+            } else {
+                try {
+                    Connection con = connection.connection();
+                    String s = "INSERT INTO student(student_name,student_surname,student_number) VALUES (?,?,?)";
+                    PreparedStatement pt = con.prepareStatement(s);
+                    pt.setString(1,studentName.getText());
+                    pt.setString(2, studentSurname.getText());
+                    pt.setInt(3, Integer.parseInt(studentID.getText()));
+                    pt.executeUpdate();
+                    String message = "Student added successfully!";
+                    JOptionPane.showMessageDialog(new JFrame(), message, "Success", 1);
+                }catch (NumberFormatException error) {
+                    String error1 = "Please type a number for the Student ID section.";
+                    JOptionPane.showMessageDialog(new JFrame(), error1, "Error", 0);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         });
@@ -163,23 +159,34 @@ public class StudentBottomPanel extends JPanel {
     public void listStudents() throws SQLException {
             createTable();
     }
-    public void changeStudentInfo() {
-        if(students.size() == 0) {
-            String error = "There are no students. Please add students!";
-            JOptionPane.showMessageDialog(new JFrame(), error, "Error",0);
+    public void changeStudentInfo() throws SQLException {
+        Connection connection1 = connection.connection();
+        statement = connection1.createStatement();
+        String query = "SELECT COUNT (*) FROM student";
+        rs = statement.executeQuery(query);
+        int size = 0;
+        while (rs.next()){
+            size = rs.getInt(1);
+        }
+        if(size == 0) {
+            String error = "Please add students!";
+            JOptionPane.showMessageDialog(new JFrame(),error,"Error!",0);
         } else {
             this.removeAll();
             this.repaint();
             this.revalidate();
-            JPanel panel = new JPanel(new FlowLayout());
-            String[] headers = {"Name", "Surname", "Student ID"};
-            Object[][] studentInfo = new Object[students.size()][3];
-            for(int j = 0; j < students.size(); j++) {
-                studentInfo[j][0] = students.get(j).getName();
-                studentInfo[j][1] = students.get(j).getSurname();
-                studentInfo[j][2] = String.valueOf(students.get(j).getStudentID());
+            JPanel panel = new JPanel(new BorderLayout());
+            Connection con = connection.connection();
+            Statement st = con.createStatement();
+            String sql = "SELECT * FROM student";
+            ResultSet rs = statement.executeQuery(sql);
+            tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID"}, 0);
+            while (rs.next()) {
+                String a = rs.getString("student_name");
+                String b = rs.getString("student_surname");
+                String c = rs.getString("student_number");
+                tablemodel.addRow(new Object[]{a, b, c});
             }
-            tablemodel = new DefaultTableModel(studentInfo, headers);
             table = new JTable(tablemodel);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
@@ -210,16 +217,22 @@ public class StudentBottomPanel extends JPanel {
                 newstudentid.setText((String) tablemodel.getValueAt(i,2));
             });
 
-            change.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    int i = table.getSelectedRow();
-                    tablemodel.setValueAt(newstudentname.getText(),i,0);
-                    tablemodel.setValueAt(newstudentsurname.getText(),i,1);
-                    tablemodel.setValueAt(newstudentid.getText(),i,2);
-                    student.setName(newstudentname.getText());
-                    student.setSurname(newstudentsurname.getText());
-                    student.setStudentID(String.valueOf(Integer.parseInt(newstudentid.getText())));
+            change.addActionListener(e -> {
+                int i = table.getSelectedRow();
+                tablemodel.setValueAt(newstudentname.getText(),i,0);
+                tablemodel.setValueAt(newstudentsurname.getText(),i,1);
+                tablemodel.setValueAt(newstudentid.getText(),i,2);
+                try (
+                    Connection connection2 = connection.connection();
+                    PreparedStatement pt1 = connection2.prepareStatement("");
+                    PreparedStatement pt = connection2.prepareStatement("UPDATE student SET student_name = ?, student_surname = ?, student_number = ? WHERE student_number = ?")) {
+                    pt.setString(1,newstudentname.getText());
+                    pt.setString(2, newstudentsurname.getText());
+                    pt.setInt(3, Integer.parseInt(newstudentid.getText()));
+                    pt.setInt(4, Integer.parseInt(student.getStudentID()));
+                    pt.executeUpdate();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             });
         }
