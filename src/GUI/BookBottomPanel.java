@@ -6,8 +6,6 @@ import Model.Book;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -27,7 +25,6 @@ public class BookBottomPanel extends JPanel {
     public BookBottomPanel(StudentBottomPanel studentBottomPanel) {
 
     }
-
     public void addBook() {
         this.removeAll();
         this.repaint();
@@ -77,7 +74,6 @@ public class BookBottomPanel extends JPanel {
             }
         });
     }
-
     public void listBooks() throws SQLException {
         Connection connection1 = connection.connection();
         statement = connection1.createStatement();
@@ -114,8 +110,6 @@ public class BookBottomPanel extends JPanel {
             this.add(panel);
         }
     }
-
-
     public void changeBookInfo() throws SQLException {
         Connection connection1 = connection.connection();
         statement = connection1.createStatement();
@@ -187,7 +181,6 @@ public class BookBottomPanel extends JPanel {
                 tablemodel.setValueAt(newpublisher.getText(),i,2);
                 tablemodel.setValueAt(newpageno.getText(),i,3);
                 try {
-                    String bookname = (String) table.getValueAt(i, 0);
                     Connection connection3 = connection.connection();
                     statement = connection3.createStatement();
                     PreparedStatement preparedStatement = connection3.prepareStatement("SELECT book_id FROM book where book_name = ?");
@@ -264,10 +257,7 @@ public class BookBottomPanel extends JPanel {
                         ex.printStackTrace();
                     }
                 }
-
             });
-
-
         }
     }
     public ArrayList<Book> getBooks() {

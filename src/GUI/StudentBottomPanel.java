@@ -7,11 +7,8 @@ import Model.Student;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class StudentBottomPanel extends JPanel {
     private Student student;
@@ -219,17 +216,26 @@ public class StudentBottomPanel extends JPanel {
 
             change.addActionListener(e -> {
                 int i = table.getSelectedRow();
+                String oldstudentname = (String) tablemodel.getValueAt(i,0);
                 tablemodel.setValueAt(newstudentname.getText(),i,0);
                 tablemodel.setValueAt(newstudentsurname.getText(),i,1);
                 tablemodel.setValueAt(newstudentid.getText(),i,2);
-                try (
+                try {
                     Connection connection2 = connection.connection();
-                    PreparedStatement pt1 = connection2.prepareStatement("");
-                    PreparedStatement pt = connection2.prepareStatement("UPDATE student SET student_name = ?, student_surname = ?, student_number = ? WHERE student_number = ?")) {
-                    pt.setString(1,newstudentname.getText());
-                    pt.setString(2, newstudentsurname.getText());
-                    pt.setInt(3, Integer.parseInt(newstudentid.getText()));
-                    pt.setInt(4, Integer.parseInt(student.getStudentID()));
+                    statement = connection2.createStatement();
+                    PreparedStatement preparedStatement = connection2.prepareStatement("SELECT student_id FROM student WHERE student_name = ?");
+                    preparedStatement.setString(1,oldstudentname);
+                    ResultSet result = preparedStatement.executeQuery();
+                    int value = 0;
+                    while(result.next()) {
+                        value = ((Number) result.getObject(1)).intValue();
+                    }
+                    Connection connection3 = connection.connection();
+                    PreparedStatement pt = connection3.prepareStatement("UPDATE student SET student_name = ?, student_surname = ?, student_number = ? WHERE student_id = ?");
+                    pt.setString(1, (String) table.getValueAt(i,0));
+                    pt.setString(2, (String) table.getValueAt(i,1));
+                    pt.setInt(3, Integer.parseInt((String) table.getValueAt(i,2)));
+                    pt.setInt(4, value);
                     pt.executeUpdate();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
