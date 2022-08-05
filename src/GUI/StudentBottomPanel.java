@@ -69,38 +69,42 @@ public class StudentBottomPanel extends JPanel {
             }
         });
     }
-    public void borrowBook() {
-        if(students.size() == 0) {
-            String error = "Please add students to the system!";
-            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
-        } else {
+    public void borrowBook() throws SQLException {
             JFrame frame = new JFrame("Borrow Book Section");
             frame.setSize(1000, 525);
             frame.setLayout(new FlowLayout());
             JPanel panel1 = new JPanel();
             bookBottomPanel = new BookBottomPanel(this);
-            String[] headers = {"Name", "Author", "Publisher", "Number of Pages"};
-            Object[][] bookInfo = new Object[bookBottomPanel.getBooks().size()][4];
-            for (int j = 0; j < bookBottomPanel.getBooks().size(); j++) {
-                bookInfo[j][0] = bookBottomPanel.getBooks().get(j).getNameOftheBook();
-                bookInfo[j][1] = bookBottomPanel.getBooks().get(j).getAuthor();
-                bookInfo[j][2] = bookBottomPanel.getBooks().get(j).getPublisher();
-                bookInfo[j][3] = String.valueOf(bookBottomPanel.getBooks().get(j).getNumberOfPages());
+            Connection con = connection.connection();
+            statement = con.createStatement();
+            String sql = "SELECT * FROM book";
+            ResultSet rs = statement.executeQuery(sql);
+            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages"}, 0);
+            while (rs.next()) {
+                String a = rs.getString("book_name");
+                String b = rs.getString("book_author");
+                String c = rs.getString("book_publisher");
+                String d = rs.getString("book_numberofpages");
+                tablemodel.addRow(new Object[]{a, b, c, d});
             }
-            table = new JTable(bookInfo, headers);
+            table = new JTable(tablemodel);
             JScrollPane scrollPane = new JScrollPane(table);
             panel1.add(scrollPane);
             frame.add(panel1);
 
             JPanel panel2 = new JPanel();
-            String[] headers1 = {"Name", "Surname", "Student ID"};
-            Object[][] studentInfo1 = new Object[students.size()][3];
-            for (int j = 0; j < students.size(); j++) {
-                studentInfo1[j][0] = students.get(j).getName();
-                studentInfo1[j][1] = students.get(j).getSurname();
-                studentInfo1[j][2] = String.valueOf(students.get(j).getStudentID());
+            Connection connection1 = connection.connection();
+            statement = connection1.createStatement();
+            String query = "SELECT * FROM student";
+            rs = statement.executeQuery(query);
+            tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID"}, 0);
+            while(rs.next()) {
+                String a = rs.getString("student_name");
+                String b = rs.getString("student_surname");
+                String c = rs.getString("student_number");
+                tablemodel.addRow(new Object[]{a,b,c});
             }
-            table1 = new JTable(studentInfo1, headers1);
+            table1 = new JTable(tablemodel);
             JScrollPane scrollPane1 = new JScrollPane(table1);
             panel2.add(scrollPane1);
             frame.add(panel2);
@@ -108,28 +112,33 @@ public class StudentBottomPanel extends JPanel {
             frame.add(borrowButton);
             frame.setVisible(true);
 
-            borrowButton.addActionListener(e -> {
+            borrowButton.addActionListener (e -> {
                 int i = table.getSelectedRow();
-                String name = (String) table.getValueAt(i, 0);
-                String author = (String) table.getValueAt(i, 1);
-                String publisher = (String) table.getValueAt(i, 2);
-                int numberofpages = Integer.parseInt(String.valueOf(table.getValueAt(i, 3)));
-                i = table1.getSelectedRow();
-                String studentname = (String) table1.getValueAt(i, 0);
-                String studentsurname = (String) table1.getValueAt(i, 1);
-                int studentID = Integer.parseInt(String.valueOf(table1.getValueAt(i, 2)));
-                borrow = new Borrow(name, author, publisher, numberofpages, studentname, studentsurname, studentID);
-                borrowedBooks.add(borrow);
-                String message = "Done!";
-                JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
+                Connection connection2 = connection.connection();
+                String query1 = "INSERT INTO borrowedbook(student_name,student_surname,student_id,book_name,book_author,book_publisher,book_pageno) VALUES (?,?,?,?,?,?,?)";
+                PreparedStatement pt = null;
+                try {
+                    pt = connection2.prepareStatement(query1);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+                try {
+                    pt.setString(1, (String) table1.getValueAt(i,0));
+                    pt.setString(2, (String) table1.getValueAt(i,1));
+                    pt.setString(3, (String) table1.getValueAt(i,2));
+                    pt.setString(4, (String) table.getValueAt(i,0));
+                    pt.setString(5, (String) table.getValueAt(i,1));
+                    pt.setString(6, (String) table.getValueAt(i,2));
+                    pt.setInt(7, Integer.parseInt((String) table.getValueAt(i,3)));
+                    pt.executeUpdate();
+                    String message = "Done!";
+                    JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             });
         }
-    }
     public void listBorrowedBooks() {
-        if(borrowedBooks.size() == 0) {
-            String error = "There are no borrowed books!";
-            JOptionPane.showMessageDialog(new JFrame(), error, "Error", 0);
-        } else {
             this.removeAll();
             this.repaint();
             this.revalidate();
@@ -152,7 +161,6 @@ public class StudentBottomPanel extends JPanel {
             panel.add(scrollPane);
             this.add(panel);
         }
-    }
     public void listStudents() throws SQLException {
             createTable();
     }
