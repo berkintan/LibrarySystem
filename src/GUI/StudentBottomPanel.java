@@ -114,6 +114,7 @@ public class StudentBottomPanel extends JPanel {
 
             borrowButton.addActionListener (e -> {
                 int i = table.getSelectedRow();
+                int i1 = table1.getSelectedRow();
                 Connection connection2 = connection.connection();
                 String query1 = "INSERT INTO borrowedbook(student_name,student_surname,student_id,book_name,book_author,book_publisher,book_pageno) VALUES (?,?,?,?,?,?,?)";
                 PreparedStatement pt = null;
@@ -123,9 +124,9 @@ public class StudentBottomPanel extends JPanel {
                     throw new RuntimeException(ex);
                 }
                 try {
-                    pt.setString(1, (String) table1.getValueAt(i,0));
-                    pt.setString(2, (String) table1.getValueAt(i,1));
-                    pt.setString(3, (String) table1.getValueAt(i,2));
+                    pt.setString(1, (String) table1.getValueAt(i1,0));
+                    pt.setString(2, (String) table1.getValueAt(i1,1));
+                    pt.setString(3, (String) table1.getValueAt(i1,2));
                     pt.setString(4, (String) table.getValueAt(i,0));
                     pt.setString(5, (String) table.getValueAt(i,1));
                     pt.setString(6, (String) table.getValueAt(i,2));
@@ -138,23 +139,27 @@ public class StudentBottomPanel extends JPanel {
                 }
             });
         }
-    public void listBorrowedBooks() {
+    public void listBorrowedBooks() throws SQLException {
             this.removeAll();
             this.repaint();
             this.revalidate();
             JPanel panel = new JPanel();
-            String[] headers = {"Book Name", "Author", "Publisher", "Number of Pages", "Student Name", "Student Surname", "Student ID" };
-            Object[][] borrowedInfo = new Object[borrowedBooks.size()][7];
-            for(int i = 0; i < borrowedBooks.size(); i++) {
-                borrowedInfo[i][0] = borrowedBooks.get(i).getName();
-                borrowedInfo[i][1] = borrowedBooks.get(i).getAuthor();
-                borrowedInfo[i][2] = borrowedBooks.get(i).getPublisher();
-                borrowedInfo[i][3] = borrowedBooks.get(i).getNumberofpages();
-                borrowedInfo[i][4] = borrowedBooks.get(i).getStudentName();
-                borrowedInfo[i][5] = borrowedBooks.get(i).getStudentSurname();
-                borrowedInfo[i][6] = borrowedBooks.get(i).getStudentID();
+            Connection con = connection.connection();
+            statement = con.createStatement();
+            String sql = "SELECT * FROM borrowedbook";
+            rs = statement.executeQuery(sql);
+            tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID", "Book Name", "Book Author", "Book Publisher", "Book Page Number"}, 0);
+            while(rs.next()) {
+                String a = rs.getString("student_name");
+                String b = rs.getString("student_surname");
+                String c = rs.getString("student_id");
+                String d = rs.getString("book_name");
+                String e = rs.getString("book_author");
+                String f = rs.getString("book_publisher");
+                String g = rs.getString("book_pageno");
+                tablemodel.addRow(new Object[]{a,b,c,d,e,f,g});
             }
-            table = new JTable(borrowedInfo, headers);
+            table = new JTable(tablemodel);
             table.setEnabled(false);
             JScrollPane scrollPane = new JScrollPane(table);
             scrollPane.setPreferredSize(new Dimension(800,425));

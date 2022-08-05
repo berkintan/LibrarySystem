@@ -53,7 +53,11 @@ public class StudentTopPanel extends JPanel {
         });
 
         borrowedBooklist.addActionListener(e -> {
-            studentBottomPanel.listBorrowedBooks();
+            try {
+                studentBottomPanel.listBorrowedBooks();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         changeStudentInfo.addActionListener(e -> {
