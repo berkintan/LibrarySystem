@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class StudentBottomPanel extends JPanel {
     private Student student;
@@ -70,104 +71,134 @@ public class StudentBottomPanel extends JPanel {
         });
     }
     public void borrowBook() throws SQLException {
-            JFrame frame = new JFrame("Borrow Book Section");
-            frame.setSize(1000, 525);
-            frame.setLayout(new FlowLayout());
-            JPanel panel1 = new JPanel();
-            bookBottomPanel = new BookBottomPanel(this);
-            Connection con = connection.connection();
-            statement = con.createStatement();
-            String sql = "SELECT * FROM book";
-            ResultSet rs = statement.executeQuery(sql);
-            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages"}, 0);
-            while (rs.next()) {
-                String a = rs.getString("book_name");
-                String b = rs.getString("book_author");
-                String c = rs.getString("book_publisher");
-                String d = rs.getString("book_numberofpages");
-                tablemodel.addRow(new Object[]{a, b, c, d});
+        JFrame frame = new JFrame("Borrow Book Section");
+        frame.setSize(1000, 525);
+        frame.setLayout(new FlowLayout());
+        JPanel panel1 = new JPanel();
+        bookBottomPanel = new BookBottomPanel(this);
+        Connection con = connection.connection();
+        statement = con.createStatement();
+        String sql = "SELECT * FROM book";
+        ResultSet rs = statement.executeQuery(sql);
+        tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages", "Availability"}, 0);
+        while (rs.next()) {
+            String a = rs.getString("book_name");
+            String b = rs.getString("book_author");
+            String c = rs.getString("book_publisher");
+            String d = rs.getString("book_numberofpages");
+            String e = rs.getString("book_available");
+            if(Objects.equals(e, "t")) {
+                e = "Yes";
+            } else {
+                e = "No";
             }
-            table = new JTable(tablemodel);
-            JScrollPane scrollPane = new JScrollPane(table);
-            panel1.add(scrollPane);
-            frame.add(panel1);
-
-            JPanel panel2 = new JPanel();
-            Connection connection1 = connection.connection();
-            statement = connection1.createStatement();
-            String query = "SELECT * FROM student";
-            rs = statement.executeQuery(query);
-            tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID"}, 0);
-            while(rs.next()) {
-                String a = rs.getString("student_name");
-                String b = rs.getString("student_surname");
-                String c = rs.getString("student_number");
-                tablemodel.addRow(new Object[]{a,b,c});
-            }
-            table1 = new JTable(tablemodel);
-            JScrollPane scrollPane1 = new JScrollPane(table1);
-            panel2.add(scrollPane1);
-            frame.add(panel2);
-            JButton borrowButton = new JButton("Borrow");
-            frame.add(borrowButton);
-            frame.setVisible(true);
-
-            borrowButton.addActionListener (e -> {
-                int i = table.getSelectedRow();
-                int i1 = table1.getSelectedRow();
-                Connection connection2 = connection.connection();
-                String query1 = "INSERT INTO borrowedbook(student_name,student_surname,student_id,book_name,book_author,book_publisher,book_pageno) VALUES (?,?,?,?,?,?,?)";
-                PreparedStatement pt = null;
-                try {
-                    pt = connection2.prepareStatement(query1);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-                try {
-                    pt.setString(1, (String) table1.getValueAt(i1,0));
-                    pt.setString(2, (String) table1.getValueAt(i1,1));
-                    pt.setString(3, (String) table1.getValueAt(i1,2));
-                    pt.setString(4, (String) table.getValueAt(i,0));
-                    pt.setString(5, (String) table.getValueAt(i,1));
-                    pt.setString(6, (String) table.getValueAt(i,2));
-                    pt.setInt(7, Integer.parseInt((String) table.getValueAt(i,3)));
-                    pt.executeUpdate();
-                    String message = "Done!";
-                    JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            });
+            tablemodel.addRow(new Object[]{a, b, c, d, e});
         }
+        table = new JTable(tablemodel);
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel1.add(scrollPane);
+        frame.add(panel1);
+
+        JPanel panel2 = new JPanel();
+        Connection connection1 = connection.connection();
+        statement = connection1.createStatement();
+        String query = "SELECT * FROM student";
+        rs = statement.executeQuery(query);
+        tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID"}, 0);
+        while(rs.next()) {
+            String a = rs.getString("student_name");
+            String b = rs.getString("student_surname");
+            String c = rs.getString("student_number");
+            tablemodel.addRow(new Object[]{a,b,c});
+        }
+        table1 = new JTable(tablemodel);
+        JScrollPane scrollPane1 = new JScrollPane(table1);
+        panel2.add(scrollPane1);
+        frame.add(panel2);
+        JButton borrowButton = new JButton("Borrow");
+        frame.add(borrowButton);
+        frame.setVisible(true);
+
+        borrowButton.addActionListener (e -> {
+            int i = table.getSelectedRow();
+            int i1 = table1.getSelectedRow();
+            try {
+                Connection connection4 = connection.connection();
+                statement = connection4.createStatement();
+                PreparedStatement pst = connection4.prepareStatement("SELECT book_available FROM book WHERE book_name = ?");
+                pst.setString(1, (String) table.getValueAt(i1,0));
+                ResultSet resultSet = pst.executeQuery();
+                boolean status = true;
+                while(resultSet.next()) {
+                    if(Objects.equals(resultSet.toString(), "No")) {
+                        status = false;
+                    }
+                }
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            Connection connection2 = connection.connection();
+            String query1 = "INSERT INTO borrowedbook(student_name,student_surname,student_id,book_name,book_author,book_publisher,book_pageno) VALUES (?,?,?,?,?,?,?)";
+            PreparedStatement pt = null;
+            try {
+                pt = connection2.prepareStatement(query1);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                pt.setString(1, (String) table1.getValueAt(i1,0));
+                pt.setString(2, (String) table1.getValueAt(i1,1));
+                pt.setString(3, (String) table1.getValueAt(i1,2));
+                pt.setString(4, (String) table.getValueAt(i,0));
+                pt.setString(5, (String) table.getValueAt(i,1));
+                pt.setString(6, (String) table.getValueAt(i,2));
+                pt.setInt(7, Integer.parseInt((String) table.getValueAt(i,3)));
+                pt.executeUpdate();
+
+                Connection connection3 = connection.connection();
+                String qq = "UPDATE book SET book_available = ? WHERE book_name = ?";
+                PreparedStatement preparedStatement = connection3.prepareStatement(qq);
+                preparedStatement.setBoolean(1,false);
+                preparedStatement.setString(2, (String) table.getValueAt(i1,3));
+                preparedStatement.executeUpdate();
+
+                String message = "Done!";
+                JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+    }
     public void listBorrowedBooks() throws SQLException {
-            this.removeAll();
-            this.repaint();
-            this.revalidate();
-            JPanel panel = new JPanel();
-            Connection con = connection.connection();
-            statement = con.createStatement();
-            String sql = "SELECT * FROM borrowedbook";
-            rs = statement.executeQuery(sql);
-            tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID", "Book Name", "Book Author", "Book Publisher", "Book Page Number"}, 0);
-            while(rs.next()) {
-                String a = rs.getString("student_name");
-                String b = rs.getString("student_surname");
-                String c = rs.getString("student_id");
-                String d = rs.getString("book_name");
-                String e = rs.getString("book_author");
-                String f = rs.getString("book_publisher");
-                String g = rs.getString("book_pageno");
-                tablemodel.addRow(new Object[]{a,b,c,d,e,f,g});
-            }
-            table = new JTable(tablemodel);
-            table.setEnabled(false);
-            JScrollPane scrollPane = new JScrollPane(table);
-            scrollPane.setPreferredSize(new Dimension(800,425));
-            panel.add(scrollPane);
-            this.add(panel);
+        this.removeAll();
+        this.repaint();
+        this.revalidate();
+        JPanel panel = new JPanel();
+        Connection con = connection.connection();
+        statement = con.createStatement();
+        String sql = "SELECT * FROM borrowedbook";
+        rs = statement.executeQuery(sql);
+        tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID", "Book Name", "Book Author", "Book Publisher", "Book Page Number"}, 0);
+        while(rs.next()) {
+            String a = rs.getString("student_name");
+            String b = rs.getString("student_surname");
+            String c = rs.getString("student_id");
+            String d = rs.getString("book_name");
+            String e = rs.getString("book_author");
+            String f = rs.getString("book_publisher");
+            String g = rs.getString("book_pageno");
+            tablemodel.addRow(new Object[]{a,b,c,d,e,f,g});
         }
+        table = new JTable(tablemodel);
+        table.setEnabled(false);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(800,425));
+        panel.add(scrollPane);
+        this.add(panel);
+    }
     public void listStudents() throws SQLException {
-            createTable();
+        createTable();
     }
     public void changeStudentInfo() throws SQLException {
         Connection connection1 = connection.connection();
@@ -309,7 +340,7 @@ public class StudentBottomPanel extends JPanel {
 
             });
         }
-        }
+    }
     public void createTable() throws SQLException {
         this.removeAll();
         this.repaint();

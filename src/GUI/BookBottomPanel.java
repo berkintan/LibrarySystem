@@ -8,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class BookBottomPanel extends JPanel {
     private Book book;
@@ -55,13 +56,14 @@ public class BookBottomPanel extends JPanel {
             } else {
                 try {
                     Connection con = connection.connection();
-                    String s = "INSERT INTO book(book_name,book_author,book_publisher,book_numberofpages) VALUES (?,?,?,?)";
+                    String s = "INSERT INTO book(book_name,book_author,book_publisher,book_numberofpages, book_available) VALUES (?,?,?,?,?)";
                     PreparedStatement pt = con.prepareStatement(s);
                     book = new Book(bookName.getText(), author.getText(), numberofPages.getText(), publisher.getText());
                     pt.setString(1,book.getNameOftheBook());
                     pt.setString(2,book.getAuthor());
                     pt.setString(3,book.getPublisher());
                     pt.setString(4,book.getNumberOfPages());
+                    pt.setBoolean(5,book.isAvailable());
                     pt.executeUpdate();
                     String message = "Book added successfully!";
                     JOptionPane.showMessageDialog(new JFrame(), message, "Done!", 1);
@@ -84,7 +86,7 @@ public class BookBottomPanel extends JPanel {
             size = rs.getInt(1);
         }
         if (size == 0) {
-            String error = "Please add students!";
+            String error = "Please add books!";
             JOptionPane.showMessageDialog(new JFrame(), error, "Error!", 0);
         } else {
             this.removeAll();
@@ -95,13 +97,19 @@ public class BookBottomPanel extends JPanel {
             statement = con.createStatement();
             String sql = "SELECT * FROM book";
             ResultSet rs = statement.executeQuery(sql);
-            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages"}, 0);
+            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages", "Availability"}, 0);
             while (rs.next()) {
                 String a = rs.getString("book_name");
                 String b = rs.getString("book_author");
                 String c = rs.getString("book_publisher");
                 String d = rs.getString("book_numberofpages");
-                tablemodel.addRow(new Object[]{a, b, c, d});
+                String e = rs.getString("book_available");
+                if(Objects.equals(e, "t")) {
+                    e = "Yes";
+                } else {
+                    e = "No";
+                }
+                tablemodel.addRow(new Object[]{a, b, c, d, e});
             }
             table = new JTable(tablemodel);
             table.setEnabled(false); // Can not select items, for not-chane purposes...
@@ -248,11 +256,11 @@ public class BookBottomPanel extends JPanel {
                 if (table.getSelectedRow() != -1) {
                     String book_name = (String) tablemodel.getValueAt(table.getSelectedRow(), 0);
                     try {
-                    PreparedStatement pt = con.prepareStatement("DELETE FROM book WHERE book_name = ?");
-                    pt.setString(1, book_name);
-                    pt.executeUpdate();
-                    pt.close();
-                    JOptionPane.showMessageDialog(null, "Book Deleted Successfully!");
+                        PreparedStatement pt = con.prepareStatement("DELETE FROM book WHERE book_name = ?");
+                        pt.setString(1, book_name);
+                        pt.executeUpdate();
+                        pt.close();
+                        JOptionPane.showMessageDialog(null, "Book Deleted Successfully!");
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }

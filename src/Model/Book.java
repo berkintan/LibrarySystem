@@ -5,12 +5,14 @@ public class Book {
     private String author;
     private String publisher;
     private String numberOfPages;
+    private boolean available = true;
 
     public Book(String nameofTheBook, String author, String numberOfPages, String publisher) {
         this.publisher = publisher;
         this.nameOftheBook = nameofTheBook;
         this.author = author;
         this.numberOfPages = numberOfPages;
+
     }
 
     public String getNameOftheBook() {
@@ -23,6 +25,14 @@ public class Book {
 
     public String getAuthor() {
         return author;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
 
     public void setAuthor(String author) {
