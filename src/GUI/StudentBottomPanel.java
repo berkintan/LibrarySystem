@@ -338,6 +338,55 @@ public class StudentBottomPanel extends JPanel {
             });
         }
     }
+    public void releaseBook() throws SQLException {
+        this.removeAll();
+        this.repaint();
+        this.revalidate();
+        JPanel panel = new JPanel();
+        Connection con = connection.connection();
+        statement = con.createStatement();
+        String sql = "SELECT * FROM borrowedbook";
+        rs = statement.executeQuery(sql);
+        tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID", "Book Name", "Book Author", "Book Publisher", "Book Page Number"}, 0);
+        while(rs.next()) {
+            String a = rs.getString("student_name");
+            String b = rs.getString("student_surname");
+            String c = rs.getString("student_id");
+            String d = rs.getString("book_name");
+            String e = rs.getString("book_author");
+            String f = rs.getString("book_publisher");
+            String g = rs.getString("book_pageno");
+            tablemodel.addRow(new Object[]{a,b,c,d,e,f,g});
+        }
+        table = new JTable(tablemodel);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        scrollPane.setPreferredSize(new Dimension(800,425));
+        JButton releaseButton = new JButton("Release Book");
+        panel.add(scrollPane);
+        panel.add(releaseButton);
+        this.add(panel);
+
+        releaseButton.addActionListener(e -> {
+            if (table.getSelectedRow() != -1) {
+                try {
+                    String book_name = (String) tablemodel.getValueAt(table.getSelectedRow(), 3);
+                    PreparedStatement pt = con.prepareStatement("DELETE FROM borrowedbook WHERE book_name = ?");
+                    pt.setString(1, book_name);
+                    pt.executeUpdate();
+                    pt = con.prepareStatement("UPDATE book SET book_available = ? WHERE book_name = ?");
+                    pt.setBoolean(1, true);
+                    pt.setString(2, book_name);
+                    pt.executeUpdate();
+                    String message = "Book has been succesfully released!";
+                    JOptionPane.showMessageDialog(new JPanel(), message, "Success!", 1);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
     public void createTable() throws SQLException {
         this.removeAll();
         this.repaint();

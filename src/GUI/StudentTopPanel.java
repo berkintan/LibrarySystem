@@ -10,6 +10,7 @@ public class StudentTopPanel extends JPanel {
     private JButton deleteStudent;
     private JButton borrowBook;
     private JButton listStudent;
+    private JButton releaseBook;
     private StudentBottomPanel studentBottomPanel;
     public StudentTopPanel() {
         this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
@@ -21,12 +22,15 @@ public class StudentTopPanel extends JPanel {
         listStudent = new JButton("List Students");
         borrowBook = new JButton("Borrow Book");
         borrowedBooklist = new JButton("Borrowed Book List");
+        releaseBook = new JButton("Release Borrowed Book");
+
         buttons.add(addStudent);
         buttons.add(changeStudentInfo);
         buttons.add(deleteStudent);
         buttons.add(listStudent);
         buttons.add(borrowBook);
         buttons.add(borrowedBooklist);
+        buttons.add(releaseBook);
         this.add(buttons);
 
         this.studentBottomPanel = new StudentBottomPanel();
@@ -73,6 +77,14 @@ public class StudentTopPanel extends JPanel {
                 studentBottomPanel.deleteStudent();
             } catch (SQLException ex) {
                 ex.printStackTrace();
+            }
+        });
+
+        releaseBook.addActionListener(e -> {
+            try {
+                studentBottomPanel.releaseBook();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
