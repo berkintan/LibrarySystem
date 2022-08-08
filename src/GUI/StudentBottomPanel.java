@@ -122,20 +122,10 @@ public class StudentBottomPanel extends JPanel {
         borrowButton.addActionListener (e -> {
             int i = table.getSelectedRow();
             int i1 = table1.getSelectedRow();
-            try {
-                Connection connection4 = connection.connection();
-                statement = connection4.createStatement();
-                PreparedStatement pst = connection4.prepareStatement("SELECT book_available FROM book WHERE book_name = ?");
-                pst.setString(1, (String) table.getValueAt(i1,0));
-                ResultSet resultSet = pst.executeQuery();
-                boolean status = true;
-                while(resultSet.next()) {
-                    if(Objects.equals(resultSet.toString(), "No")) {
-                        status = false;
-                    }
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
+            String statusString = (String) table.getValueAt(i,4);
+            boolean status = true;
+            if(Objects.equals(statusString, "No")) {
+                status = false;
             }
             Connection connection2 = connection.connection();
             String query1 = "INSERT INTO borrowedbook(student_name,student_surname,student_id,book_name,book_author,book_publisher,book_pageno) VALUES (?,?,?,?,?,?,?)";
@@ -146,28 +136,35 @@ public class StudentBottomPanel extends JPanel {
                 throw new RuntimeException(ex);
             }
             try {
-                pt.setString(1, (String) table1.getValueAt(i1,0));
-                pt.setString(2, (String) table1.getValueAt(i1,1));
-                pt.setString(3, (String) table1.getValueAt(i1,2));
-                pt.setString(4, (String) table.getValueAt(i,0));
-                pt.setString(5, (String) table.getValueAt(i,1));
-                pt.setString(6, (String) table.getValueAt(i,2));
-                pt.setInt(7, Integer.parseInt((String) table.getValueAt(i,3)));
-                pt.executeUpdate();
+                if(!status) {
+                    String error = "Selected book has been already borrowed!";
+                    JOptionPane.showMessageDialog(new JPanel(),error,"Error!",0);
+                } else {
+                    pt.setString(1, (String) table1.getValueAt(i1, 0));
+                    pt.setString(2, (String) table1.getValueAt(i1, 1));
+                    pt.setString(3, (String) table1.getValueAt(i1, 2));
+                    pt.setString(4, (String) table.getValueAt(i, 0));
+                    pt.setString(5, (String) table.getValueAt(i, 1));
+                    pt.setString(6, (String) table.getValueAt(i, 2));
+                    pt.setInt(7, Integer.parseInt((String) table.getValueAt(i, 3)));
+                    pt.executeUpdate();
 
-                Connection connection3 = connection.connection();
-                String qq = "UPDATE book SET book_available = ? WHERE book_name = ?";
-                PreparedStatement preparedStatement = connection3.prepareStatement(qq);
-                preparedStatement.setBoolean(1,false);
-                preparedStatement.setString(2, (String) table.getValueAt(i1,3));
-                preparedStatement.executeUpdate();
+                    Connection connection3 = connection.connection();
+                    String qq = "UPDATE book SET book_available = ? WHERE book_name = ?";
+                    PreparedStatement preparedStatement = connection3.prepareStatement(qq);
+                    preparedStatement.setBoolean(1, false);
+                    preparedStatement.setString(2, (String) table.getValueAt(i, 0));
+                    preparedStatement.executeUpdate();
 
-                String message = "Done!";
-                JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
+                    String message = "Done!";
+                    JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
+                }
+
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
         });
+
 
     }
     public void listBorrowedBooks() throws SQLException {
