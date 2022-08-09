@@ -56,7 +56,7 @@ public class BookBottomPanel extends JPanel {
             } else {
                 try {
                     Connection con = connection.connection();
-                    String s = "INSERT INTO book(book_name,book_author,book_publisher,book_numberofpages, book_available) VALUES (?,?,?,?,?)";
+                    String s = "INSERT INTO book(book_name,book_author,book_publisher,book_numberofpages, book_available, book_availabledate) VALUES (?,?,?,?,?,?)";
                     PreparedStatement pt = con.prepareStatement(s);
                     book = new Book(bookName.getText(), author.getText(), numberofPages.getText(), publisher.getText());
                     pt.setString(1,book.getNameOftheBook());
@@ -64,6 +64,7 @@ public class BookBottomPanel extends JPanel {
                     pt.setString(3,book.getPublisher());
                     pt.setString(4,book.getNumberOfPages());
                     pt.setBoolean(5,book.isAvailable());
+                    pt.setString(6, book.getLocalDate());
                     pt.executeUpdate();
                     String message = "Book added successfully!";
                     JOptionPane.showMessageDialog(new JFrame(), message, "Done!", 1);
@@ -92,30 +93,32 @@ public class BookBottomPanel extends JPanel {
             this.removeAll();
             this.repaint();
             this.revalidate();
-            JPanel panel = new JPanel(new FlowLayout());
+            JPanel panel = new JPanel(new BorderLayout());
             Connection con = connection.connection();
             statement = con.createStatement();
             String sql = "SELECT * FROM book";
             ResultSet rs = statement.executeQuery(sql);
-            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages", "Availability"}, 0);
+            tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages", "Availability", "Available Date"}, 0);
             while (rs.next()) {
                 String a = rs.getString("book_name");
                 String b = rs.getString("book_author");
                 String c = rs.getString("book_publisher");
                 String d = rs.getString("book_numberofpages");
                 String e = rs.getString("book_available");
+                String f = rs.getString("book_availabledate");
                 if(Objects.equals(e, "t")) {
                     e = "Yes";
                 } else {
                     e = "No";
                 }
-                tablemodel.addRow(new Object[]{a, b, c, d, e});
+                tablemodel.addRow(new Object[]{a, b, c, d, e, f});
             }
             table = new JTable(tablemodel);
+            table.setPreferredSize(new Dimension(100,1000));
             table.setEnabled(false); // Can not select items, for not-chane purposes...
             JScrollPane scrollPane = new JScrollPane(table);
             panel.add(scrollPane);
-            this.add(panel);
+            this.add(panel, BorderLayout.SOUTH);
         }
     }
     public void changeBookInfo() throws SQLException {

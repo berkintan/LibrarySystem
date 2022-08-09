@@ -7,7 +7,10 @@ import Model.Student;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.nio.channels.SelectionKey;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -137,8 +140,18 @@ public class StudentBottomPanel extends JPanel {
             }
             try {
                 if(!status) {
-                    String error = "Selected book has been already borrowed!";
-                    JOptionPane.showMessageDialog(new JPanel(),error,"Error!",0);
+                     String error = "Selected book has been already borrowed!, Would you like to create an order?";
+                     int selectionKey = JOptionPane.showConfirmDialog(new JPanel(),error,"Error!", JOptionPane.YES_NO_OPTION);
+                     if(selectionKey == 0) {
+                         JFrame createOrder = new JFrame("Create Order For Book");
+                         createOrder.setLayout(new FlowLayout());
+                         JLabel label = new JLabel("Book will be available at: ");
+                         createOrder.add(label);
+                         JTextField textField = new JTextField();
+                         createOrder.add(textField);
+                         createOrder.setSize(500,500);
+                         createOrder.setVisible(true);
+                     }
                 } else {
                     pt.setString(1, (String) table1.getValueAt(i1, 0));
                     pt.setString(2, (String) table1.getValueAt(i1, 1));
@@ -149,11 +162,15 @@ public class StudentBottomPanel extends JPanel {
                     pt.setInt(7, Integer.parseInt((String) table.getValueAt(i, 3)));
                     pt.executeUpdate();
 
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("uuuu/MM/dd");
+                    LocalDate localDate = LocalDate.now();
+
                     Connection connection3 = connection.connection();
-                    String qq = "UPDATE book SET book_available = ? WHERE book_name = ?";
+                    String qq = "UPDATE book SET book_available = ?, book_availabledate = ? WHERE book_name = ?";
                     PreparedStatement preparedStatement = connection3.prepareStatement(qq);
                     preparedStatement.setBoolean(1, false);
-                    preparedStatement.setString(2, (String) table.getValueAt(i, 0));
+                    preparedStatement.setString(2, String.valueOf(localDate));
+                    preparedStatement.setString(3, (String) table.getValueAt(i, 0));
                     preparedStatement.executeUpdate();
 
                     String message = "Done!";
@@ -407,6 +424,5 @@ public class StudentBottomPanel extends JPanel {
         table.setEnabled(false); // Can not select items, for not-change purposes...
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane);
-        this.add(panel);
     }
 }
