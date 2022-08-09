@@ -5,6 +5,7 @@ import Model.Borrow;
 import Model.Student;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
@@ -12,6 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StudentBottomPanel extends JPanel {
     private Student student;
@@ -81,14 +84,14 @@ public class StudentBottomPanel extends JPanel {
         Connection con = connection.connection();
         statement = con.createStatement();
         String sql = "SELECT * FROM book";
-        ResultSet rs = statement.executeQuery(sql);
+        AtomicReference<ResultSet> rs = new AtomicReference<>(statement.executeQuery(sql));
         tablemodel = new DefaultTableModel(new String[]{"Book Name", "Author", "Publisher", "Number of Pages", "Availability"}, 0);
-        while (rs.next()) {
-            String a = rs.getString("book_name");
-            String b = rs.getString("book_author");
-            String c = rs.getString("book_publisher");
-            String d = rs.getString("book_numberofpages");
-            String e = rs.getString("book_available");
+        while (rs.get().next()) {
+            String a = rs.get().getString("book_name");
+            String b = rs.get().getString("book_author");
+            String c = rs.get().getString("book_publisher");
+            String d = rs.get().getString("book_numberofpages");
+            String e = rs.get().getString("book_available");
             if(Objects.equals(e, "t")) {
                 e = "Yes";
             } else {
@@ -105,12 +108,12 @@ public class StudentBottomPanel extends JPanel {
         Connection connection1 = connection.connection();
         statement = connection1.createStatement();
         String query = "SELECT * FROM student";
-        rs = statement.executeQuery(query);
+        rs.set(statement.executeQuery(query));
         tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID"}, 0);
-        while(rs.next()) {
-            String a = rs.getString("student_name");
-            String b = rs.getString("student_surname");
-            String c = rs.getString("student_number");
+        while(rs.get().next()) {
+            String a = rs.get().getString("student_name");
+            String b = rs.get().getString("student_surname");
+            String c = rs.get().getString("student_number");
             tablemodel.addRow(new Object[]{a,b,c});
         }
         table1 = new JTable(tablemodel);
@@ -147,10 +150,32 @@ public class StudentBottomPanel extends JPanel {
                          JLabel label = new JLabel("Book will be available at: ");
                          createOrder.add(label);
                          Connection connection3 = connection.connection();
-                         String queryy = "SELECT book_availabledate FROM book WHERE ";
-                         JTextField textField = new JTextField();
-                         createOrder.add(textField);
-                         createOrder.setSize(500,500);
+                         statement = connection3.createStatement();
+                         String qurry = "SELECT book_availabledate FROM book WHERE book_name = ?";
+                         PreparedStatement ppt = connection3.prepareStatement(qurry);
+                         ppt.setString(1, (String) table.getValueAt(table.getSelectedRow(), 0));
+                         ResultSet resultSet = ppt.executeQuery();
+                         String info = "";
+                         while(resultSet.next()) {
+                             info = resultSet.getString(1);
+                         }
+                         JLabel label1 = new JLabel(info);
+                         createOrder.add(label1);
+                         JLabel label2 = new JLabel("Would you like to order the book? When you create a order the book will immediately assigned to you" +
+                                 "after the current person brings the book.");
+                         createOrder.add(label2);
+                         JButton orderButton = new JButton("Order The Book");
+                         createOrder.add(orderButton);
+                         String finalInfo = info;
+                         orderButton.addActionListener(ex -> {
+                             SimpleDateFormat dtf = new SimpleDateFormat("dd-MM-yyyy");
+                             Calendar cal = Calendar.getInstance();
+                             String date = dtf.format(cal.getTime());
+                             if(date.equals(finalInfo)) {
+
+                             }
+                         });
+                         createOrder.setSize(900,200);
                          createOrder.setVisible(true);
                      }
                 } else {
@@ -415,7 +440,7 @@ public class StudentBottomPanel extends JPanel {
         this.removeAll();
         this.repaint();
         this.revalidate();
-        JPanel panel = new JPanel(new FlowLayout());
+        JPanel panel = new JPanel(new BorderLayout());
         Connection con = connection.connection();
         statement = con.createStatement();
         String sql = "SELECT * FROM student";
@@ -431,5 +456,10 @@ public class StudentBottomPanel extends JPanel {
         table.setEnabled(false); // Can not select items, for not-change purposes...
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane);
+        this.add(panel, BorderLayout.SOUTH);
+    }
+
+    public void createOrder() {
+
     }
 }
