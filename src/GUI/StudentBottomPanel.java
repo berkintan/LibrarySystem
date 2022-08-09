@@ -7,11 +7,10 @@ import Model.Student;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.nio.channels.SelectionKey;
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Objects;
 
 public class StudentBottomPanel extends JPanel {
@@ -147,6 +146,8 @@ public class StudentBottomPanel extends JPanel {
                          createOrder.setLayout(new FlowLayout());
                          JLabel label = new JLabel("Book will be available at: ");
                          createOrder.add(label);
+                         Connection connection3 = connection.connection();
+                         String queryy = "SELECT book_availabledate FROM book WHERE ";
                          JTextField textField = new JTextField();
                          createOrder.add(textField);
                          createOrder.setSize(500,500);
@@ -162,14 +163,16 @@ public class StudentBottomPanel extends JPanel {
                     pt.setInt(7, Integer.parseInt((String) table.getValueAt(i, 3)));
                     pt.executeUpdate();
 
-                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("uuuu/MM/dd");
-                    LocalDate localDate = LocalDate.now();
+                    SimpleDateFormat dtf = new SimpleDateFormat("dd-MM-yyyy");
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.DAY_OF_MONTH,5);
+                    String date = dtf.format(cal.getTime());
 
                     Connection connection3 = connection.connection();
                     String qq = "UPDATE book SET book_available = ?, book_availabledate = ? WHERE book_name = ?";
                     PreparedStatement preparedStatement = connection3.prepareStatement(qq);
                     preparedStatement.setBoolean(1, false);
-                    preparedStatement.setString(2, String.valueOf(localDate));
+                    preparedStatement.setString(2, date);
                     preparedStatement.setString(3, (String) table.getValueAt(i, 0));
                     preparedStatement.executeUpdate();
 
@@ -388,13 +391,17 @@ public class StudentBottomPanel extends JPanel {
         releaseButton.addActionListener(e -> {
             if (table.getSelectedRow() != -1) {
                 try {
+                    SimpleDateFormat dtf = new SimpleDateFormat("dd-MM-yyyy");
+                    Calendar cal = Calendar.getInstance();
+                    String date = dtf.format(cal.getTime());
                     String book_name = (String) tablemodel.getValueAt(table.getSelectedRow(), 3);
                     PreparedStatement pt = con.prepareStatement("DELETE FROM borrowedbook WHERE book_name = ?");
                     pt.setString(1, book_name);
                     pt.executeUpdate();
-                    pt = con.prepareStatement("UPDATE book SET book_available = ? WHERE book_name = ?");
+                    pt = con.prepareStatement("UPDATE book SET book_available = ?, book_availabledate = ? WHERE book_name = ?");
                     pt.setBoolean(1, true);
-                    pt.setString(2, book_name);
+                    pt.setString(2,date);
+                    pt.setString(3, book_name);
                     pt.executeUpdate();
                     String message = "Book has been succesfully released!";
                     JOptionPane.showMessageDialog(new JPanel(), message, "Success!", 1);

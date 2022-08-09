@@ -9,7 +9,7 @@ public class Book {
     private String publisher;
     private String numberOfPages;
     private boolean available = true;
-    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/uuu");
+    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-uuu");
     LocalDate localDate = LocalDate.now();
 
 
