@@ -3,9 +3,11 @@ package GUI;
 import Controller.JDBC;
 import Model.Borrow;
 import Model.Student;
+import net.sourceforge.jdatepicker.impl.JDatePanelImpl;
+import net.sourceforge.jdatepicker.impl.JDatePickerImpl;
+import net.sourceforge.jdatepicker.impl.UtilDateModel;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
@@ -13,8 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Date;
 
 public class StudentBottomPanel extends JPanel {
     private Student student;
@@ -120,6 +122,25 @@ public class StudentBottomPanel extends JPanel {
         JScrollPane scrollPane1 = new JScrollPane(table1);
         panel2.add(scrollPane1);
         frame.add(panel2);
+
+        // Start date...
+        JLabel startdate = new JLabel("Start date: ");
+        UtilDateModel model = new UtilDateModel();
+        JDatePanelImpl datePanel = new JDatePanelImpl(model);
+        JDatePickerImpl datePicker = new JDatePickerImpl(datePanel);
+        model.setSelected(true); // Default today's date...
+        frame.add(startdate);
+        frame.add(datePicker);
+
+        // Finish date...
+        JLabel finishdate = new JLabel("Finish date: ");
+        UtilDateModel model1 = new UtilDateModel();
+        JDatePanelImpl datePanel1 = new JDatePanelImpl(model1);
+        JDatePickerImpl datePicker1 = new JDatePickerImpl(datePanel1);
+        frame.add(finishdate);
+        frame.add(datePicker1);
+        System.out.println(model1.getValue());
+
         JButton borrowButton = new JButton("Borrow");
         frame.add(borrowButton);
         frame.setVisible(true);
@@ -457,9 +478,5 @@ public class StudentBottomPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane);
         this.add(panel, BorderLayout.SOUTH);
-    }
-
-    public void createOrder() {
-
     }
 }

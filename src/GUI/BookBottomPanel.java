@@ -271,7 +271,4 @@ public class BookBottomPanel extends JPanel {
             });
         }
     }
-    public ArrayList<Book> getBooks() {
-        return books;
-    }
 }
