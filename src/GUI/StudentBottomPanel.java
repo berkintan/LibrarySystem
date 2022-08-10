@@ -12,11 +12,15 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StudentBottomPanel extends JPanel {
     private Student student;
@@ -131,6 +135,7 @@ public class StudentBottomPanel extends JPanel {
         model.setSelected(true); // Default today's date...
         frame.add(startdate);
         frame.add(datePicker);
+        //Date selectedDate = (Date) datePicker.getModel().getValue();
 
         // Finish date...
         JLabel finishdate = new JLabel("Finish date: ");
@@ -139,7 +144,6 @@ public class StudentBottomPanel extends JPanel {
         JDatePickerImpl datePicker1 = new JDatePickerImpl(datePanel1);
         frame.add(finishdate);
         frame.add(datePicker1);
-        System.out.println(model1.getValue());
 
         JButton borrowButton = new JButton("Borrow");
         frame.add(borrowButton);
@@ -209,16 +213,38 @@ public class StudentBottomPanel extends JPanel {
                     pt.setInt(7, Integer.parseInt((String) table.getValueAt(i, 3)));
                     pt.executeUpdate();
 
-                    SimpleDateFormat dtf = new SimpleDateFormat("dd-MM-yyyy");
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.DAY_OF_MONTH,5);
-                    String date = dtf.format(cal.getTime());
+//                    SimpleDateFormat dtf = new SimpleDateFormat("dd-MM-yyyy");
+//                    Calendar cal = Calendar.getInstance();
+//                    cal.add(Calendar.DAY_OF_MONTH,5);
+//                    String date = dtf.format(cal.getTime());
+                    Locale.setDefault(Locale.UK); // So that other readers can run the example; don’t include in your production code
+
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG);
+
+                    int selectedStartDate1 = datePicker.getModel().getDay();
+                    int step = datePicker.getModel().getMonth();
+                    String selectedStartDate2 = getMonth(step);
+                    int selectedStartDate3 = datePicker.getModel().getYear();
+                    String start = selectedStartDate1 + " " + selectedStartDate2 + " " + selectedStartDate3;
+
+                    int selectedFinishDate1 = datePicker1.getModel().getDay();
+                    int step1 = datePicker1.getModel().getMonth();
+                    String selectedFinishDate2 = getMonth(step1);
+                    int selectedFinishDate3 = datePicker1.getModel().getYear();
+                    String finish = selectedFinishDate1 + " " + selectedFinishDate2 + " " + selectedFinishDate3;
+
+
+                    LocalDate from = LocalDate.parse(start, dateFormatter);
+                    LocalDate to = LocalDate.parse(finish, dateFormatter);
+                    long difference = ChronoUnit.DAYS.between(from, to);
+
+                    System.out.println(difference);
 
                     Connection connection3 = connection.connection();
                     String qq = "UPDATE book SET book_available = ?, book_availabledate = ? WHERE book_name = ?";
                     PreparedStatement preparedStatement = connection3.prepareStatement(qq);
                     preparedStatement.setBoolean(1, false);
-                    preparedStatement.setString(2, date);
+                    preparedStatement.setString(2, finish);
                     preparedStatement.setString(3, (String) table.getValueAt(i, 0));
                     preparedStatement.executeUpdate();
 
@@ -478,5 +504,36 @@ public class StudentBottomPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane);
         this.add(panel, BorderLayout.SOUTH);
+    }
+
+    public String getMonth(int month) {
+        switch (month) {
+            case 1:
+                return "January";
+            case 2:
+                return "February";
+            case 3:
+                return "March";
+            case 4:
+                return  "April";
+            case 5:
+                return "May";
+            case 6:
+                return "June";
+            case 7:
+                return "July";
+            case 8:
+                return "August";
+            case 9:
+                return "September";
+            case 10:
+                return "October";
+            case 11:
+                return "November";
+            case 12:
+                return "December";
+            default:
+                return "lol";
+        }
     }
 }
