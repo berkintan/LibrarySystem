@@ -1,6 +1,7 @@
 package GUI;
 
 import javax.swing.*;
+import java.awt.*;
 import java.sql.SQLException;
 
 public class StudentTopPanel extends JPanel {
@@ -16,6 +17,7 @@ public class StudentTopPanel extends JPanel {
         this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         this.setBorder(BorderFactory.createTitledBorder("Control Section..."));
         JPanel buttons = new JPanel();
+        buttons.setPreferredSize(new Dimension(1000,35));
         addStudent = new JButton("Add Student");
         changeStudentInfo = new JButton("Change Student Info");
         deleteStudent = new JButton("Delete Student");

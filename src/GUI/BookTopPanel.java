@@ -16,6 +16,7 @@ public class BookTopPanel extends JPanel {
         this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         this.setBorder(BorderFactory.createTitledBorder("Control Section..."));
         JPanel buttons = new JPanel();
+        buttons.setPreferredSize(new Dimension(1000,35));
         addBtn = new JButton("Add Book");
         changeBtn = new JButton("Change Book Info");
         deleteBtn = new JButton("Delete Book");

@@ -153,6 +153,7 @@ public class BookBottomPanel extends JPanel {
             table = new JTable(tablemodel);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
+            scrollPane.setPreferredSize(new Dimension(800,500));
             panel.add(scrollPane, BorderLayout.NORTH);
 
             this.add(panel, BorderLayout.CENTER);
@@ -249,6 +250,7 @@ public class BookBottomPanel extends JPanel {
             table = new JTable(tablemodel);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
+            scrollPane.setPreferredSize(new Dimension(800,500));
             panel.add(scrollPane, BorderLayout.NORTH);
 
             JButton deletebutton = new JButton("Delete Selected Book");

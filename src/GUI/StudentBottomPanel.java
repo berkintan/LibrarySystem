@@ -1,8 +1,6 @@
 package GUI;
 
 import Controller.JDBC;
-import Model.Borrow;
-import Model.Student;
 import net.sourceforge.jdatepicker.impl.JDatePanelImpl;
 import net.sourceforge.jdatepicker.impl.JDatePickerImpl;
 import net.sourceforge.jdatepicker.impl.UtilDateModel;
@@ -13,21 +11,15 @@ import java.awt.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.time.format.TextStyle;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StudentBottomPanel extends JPanel {
-    private Student student;
-    private Borrow borrow;
-    private ArrayList<Borrow> borrowedBooks = new ArrayList<>();
     private BookBottomPanel bookBottomPanel;
-    private ArrayList<Student> students = new ArrayList<>();
     private JTable table;
     private JTable table1;
     private DefaultTableModel tablemodel;
@@ -37,7 +29,6 @@ public class StudentBottomPanel extends JPanel {
     public StudentBottomPanel() {
         this.setLayout(new BorderLayout());
     }
-
     public void addStudent() {
         this.removeAll();
         this.repaint();
@@ -128,6 +119,7 @@ public class StudentBottomPanel extends JPanel {
         frame.add(panel2);
 
         // Start date...
+
         JLabel startdate = new JLabel("Start date: ");
         UtilDateModel model = new UtilDateModel();
         JDatePanelImpl datePanel = new JDatePanelImpl(model);
@@ -135,7 +127,6 @@ public class StudentBottomPanel extends JPanel {
         model.setSelected(true); // Default today's date...
         frame.add(startdate);
         frame.add(datePicker);
-        //Date selectedDate = (Date) datePicker.getModel().getValue();
 
         // Finish date...
         JLabel finishdate = new JLabel("Finish date: ");
@@ -150,113 +141,131 @@ public class StudentBottomPanel extends JPanel {
         frame.setVisible(true);
 
         borrowButton.addActionListener (e -> {
-            int i = table.getSelectedRow();
-            int i1 = table1.getSelectedRow();
-            String statusString = (String) table.getValueAt(i,4);
-            boolean status = true;
-            if(Objects.equals(statusString, "No")) {
-                status = false;
-            }
-            Connection connection2 = connection.connection();
-            String query1 = "INSERT INTO borrowedbook(student_name,student_surname,student_id,book_name,book_author,book_publisher,book_pageno) VALUES (?,?,?,?,?,?,?)";
-            PreparedStatement pt = null;
-            try {
-                pt = connection2.prepareStatement(query1);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-            try {
-                if(!status) {
-                     String error = "Selected book has been already borrowed!, Would you like to create an order?";
-                     int selectionKey = JOptionPane.showConfirmDialog(new JPanel(),error,"Error!", JOptionPane.YES_NO_OPTION);
-                     if(selectionKey == 0) {
-                         JFrame createOrder = new JFrame("Create Order For Book");
-                         createOrder.setLayout(new FlowLayout());
-                         JLabel label = new JLabel("Book will be available at: ");
-                         createOrder.add(label);
-                         Connection connection3 = connection.connection();
-                         statement = connection3.createStatement();
-                         String qurry = "SELECT book_availabledate FROM book WHERE book_name = ?";
-                         PreparedStatement ppt = connection3.prepareStatement(qurry);
-                         ppt.setString(1, (String) table.getValueAt(table.getSelectedRow(), 0));
-                         ResultSet resultSet = ppt.executeQuery();
-                         String info = "";
-                         while(resultSet.next()) {
-                             info = resultSet.getString(1);
-                         }
-                         JLabel label1 = new JLabel(info);
-                         createOrder.add(label1);
-                         JLabel label2 = new JLabel("Would you like to order the book? When you create a order the book will immediately assigned to you" +
-                                 "after the current person brings the book.");
-                         createOrder.add(label2);
-                         JButton orderButton = new JButton("Order The Book");
-                         createOrder.add(orderButton);
-                         String finalInfo = info;
-                         orderButton.addActionListener(ex -> {
-                             SimpleDateFormat dtf = new SimpleDateFormat("dd-MM-yyyy");
-                             Calendar cal = Calendar.getInstance();
-                             String date = dtf.format(cal.getTime());
-                             if(date.equals(finalInfo)) {
-
-                             }
-                         });
-                         createOrder.setSize(900,200);
-                         createOrder.setVisible(true);
-                     }
-                } else {
-                    pt.setString(1, (String) table1.getValueAt(i1, 0));
-                    pt.setString(2, (String) table1.getValueAt(i1, 1));
-                    pt.setString(3, (String) table1.getValueAt(i1, 2));
-                    pt.setString(4, (String) table.getValueAt(i, 0));
-                    pt.setString(5, (String) table.getValueAt(i, 1));
-                    pt.setString(6, (String) table.getValueAt(i, 2));
-                    pt.setInt(7, Integer.parseInt((String) table.getValueAt(i, 3)));
-                    pt.executeUpdate();
-
-//                    SimpleDateFormat dtf = new SimpleDateFormat("dd-MM-yyyy");
-//                    Calendar cal = Calendar.getInstance();
-//                    cal.add(Calendar.DAY_OF_MONTH,5);
-//                    String date = dtf.format(cal.getTime());
-                    Locale.setDefault(Locale.UK); // So that other readers can run the example; don’t include in your production code
-
-                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG);
-
-                    int selectedStartDate1 = datePicker.getModel().getDay();
-                    int step = datePicker.getModel().getMonth();
-                    String selectedStartDate2 = getMonth(step);
-                    int selectedStartDate3 = datePicker.getModel().getYear();
-                    String start = selectedStartDate1 + " " + selectedStartDate2 + " " + selectedStartDate3;
-
-                    int selectedFinishDate1 = datePicker1.getModel().getDay();
-                    int step1 = datePicker1.getModel().getMonth();
-                    String selectedFinishDate2 = getMonth(step1);
-                    int selectedFinishDate3 = datePicker1.getModel().getYear();
-                    String finish = selectedFinishDate1 + " " + selectedFinishDate2 + " " + selectedFinishDate3;
-
-
-                    LocalDate from = LocalDate.parse(start, dateFormatter);
-                    LocalDate to = LocalDate.parse(finish, dateFormatter);
-                    long difference = ChronoUnit.DAYS.between(from, to);
-
-                    System.out.println(difference);
-
-                    Connection connection3 = connection.connection();
-                    String qq = "UPDATE book SET book_available = ?, book_availabledate = ? WHERE book_name = ?";
-                    PreparedStatement preparedStatement = connection3.prepareStatement(qq);
-                    preparedStatement.setBoolean(1, false);
-                    preparedStatement.setString(2, finish);
-                    preparedStatement.setString(3, (String) table.getValueAt(i, 0));
-                    preparedStatement.executeUpdate();
-
-                    String message = "Done!";
-                    JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
+            if(datePicker1.getModel().getValue() == null || datePicker.getModel().getValue() == null) {
+                String err = "Please select a time slot!";
+                JOptionPane.showMessageDialog(new Frame(),err,"Error",1);
+            } else {
+                int i = table.getSelectedRow();
+                int i1 = table1.getSelectedRow();
+                String statusString = (String) table.getValueAt(i, 4);
+                boolean status = true;
+                if (Objects.equals(statusString, "No")) {
+                    status = false;
                 }
+                Connection connection2 = connection.connection();
+                String query1 = "INSERT INTO borrowedbook(student_name,student_surname,student_id,book_name,book_author,book_publisher,book_pageno) VALUES (?,?,?,?,?,?,?)";
+                PreparedStatement pt;
+                try {
+                    pt = connection2.prepareStatement(query1);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+                try {
+                    if (!status) {
+                        String error = "Selected book has been already borrowed!, Would you like to create an order?";
+                        int selectionKey = JOptionPane.showConfirmDialog(new JPanel(), error, "Error!", JOptionPane.YES_NO_OPTION);
+                        if (selectionKey == 0) {
+                            JFrame createOrder = new JFrame("Create Order For Book");
+                            createOrder.setLayout(new FlowLayout());
+                            JLabel label = new JLabel("Book will be available at: ");
+                            createOrder.add(label);
+                            Connection connection3 = connection.connection();
+                            statement = connection3.createStatement();
+                            String qurry = "SELECT book_availabledate FROM book WHERE book_name = ?";
+                            PreparedStatement ppt = connection3.prepareStatement(qurry);
+                            ppt.setString(1, (String) table.getValueAt(table.getSelectedRow(), 0));
+                            ResultSet resultSet = ppt.executeQuery();
+                            String info = "";
+                            while (resultSet.next()) {
+                                info = resultSet.getString(1);
+                            }
+                            JLabel label1 = new JLabel(info);
+                            createOrder.add(label1);
+                            JLabel label2 = new JLabel("Would you like to order the book? Please select a time slot.");
+                            createOrder.add(label2);
+                            String finalInfo = info;
 
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+                            //Start date
+                            JLabel startdate2 = new JLabel("Start date: ");
+                            UtilDateModel model2 = new UtilDateModel();
+                            JDatePanelImpl datePanel2 = new JDatePanelImpl(model2);
+                            JDatePickerImpl datePicker2 = new JDatePickerImpl(datePanel2);
+                            model.setSelected(true); // Default today's date...
+                            createOrder.add(startdate2);
+                            createOrder.add(datePicker2);
+
+                            //Finish date
+                            JLabel finishdate3 = new JLabel("Finish date: ");
+                            UtilDateModel model3 = new UtilDateModel();
+                            JDatePanelImpl datePanel3 = new JDatePanelImpl(model3);
+                            JDatePickerImpl datePicker3 = new JDatePickerImpl(datePanel3);
+                            model.setSelected(true); // Default today's date...
+                            createOrder.add(finishdate3);
+                            createOrder.add(datePicker3);
+
+                            JButton orderButton = new JButton("Order The Book");
+                            createOrder.add(orderButton);
+
+                            orderButton.addActionListener(ex -> {
+                                if(datePicker2.getModel().getValue() == null || datePicker3.getModel().getValue() == null) {
+                                    String err1 = "Please select a time slot!";
+                                    JOptionPane.showMessageDialog(new JFrame(), err1, "Error",1);
+                                }
+                            });
+                            createOrder.setSize(600, 150);
+                            createOrder.setVisible(true);
+                        }
+                    } else {
+                        pt.setString(1, (String) table1.getValueAt(i1, 0));
+                        pt.setString(2, (String) table1.getValueAt(i1, 1));
+                        pt.setString(3, (String) table1.getValueAt(i1, 2));
+                        pt.setString(4, (String) table.getValueAt(i, 0));
+                        pt.setString(5, (String) table.getValueAt(i, 1));
+                        pt.setString(6, (String) table.getValueAt(i, 2));
+                        pt.setInt(7, Integer.parseInt((String) table.getValueAt(i, 3)));
+                        pt.executeUpdate();
+
+                        Locale.setDefault(Locale.UK);
+                        DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG);
+
+                        int selectedStartDate1 = datePicker.getModel().getDay();
+                        int step = datePicker.getModel().getMonth();
+                        step++;
+                        String selectedStartDate2 = getMonth(step);
+                        int selectedStartDate3 = datePicker.getModel().getYear();
+                        String start = selectedStartDate1 + " " + selectedStartDate2 + " " + selectedStartDate3;
+                        System.out.println(start);
+
+                        int selectedFinishDate1 = datePicker1.getModel().getDay();
+                        int step1 = datePicker1.getModel().getMonth();
+                        step1++;
+                        System.out.println(step1);
+                        String selectedFinishDate2 = getMonth(step1);
+                        int selectedFinishDate3 = datePicker1.getModel().getYear();
+                        String finish = selectedFinishDate1 + " " + selectedFinishDate2 + " " + selectedFinishDate3;
+                        System.out.println(finish);
+
+                        LocalDate from = LocalDate.parse(start, dateFormatter);
+                        LocalDate to = LocalDate.parse(finish, dateFormatter);
+                        //long difference = ChronoUnit.DAYS.between(from, to);
+
+                        Connection connection3 = connection.connection();
+                        String qq = "UPDATE book SET book_available = ?, book_availabledate = ? WHERE book_name = ?";
+                        PreparedStatement preparedStatement = connection3.prepareStatement(qq);
+                        preparedStatement.setBoolean(1, false);
+                        preparedStatement.setString(2, finish);
+                        preparedStatement.setString(3, (String) table.getValueAt(i, 0));
+                        preparedStatement.executeUpdate();
+
+                        String message = "Done!";
+                        JOptionPane.showMessageDialog(new JFrame(), message, "Successful!", 1);
+                    }
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
-
 
     }
     public void listBorrowedBooks() throws SQLException {
@@ -282,7 +291,7 @@ public class StudentBottomPanel extends JPanel {
         table = new JTable(tablemodel);
         table.setEnabled(false);
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(800,425));
+        scrollPane.setPreferredSize(new Dimension(1000,425));
         panel.add(scrollPane);
         this.add(panel);
     }
@@ -463,16 +472,21 @@ public class StudentBottomPanel extends JPanel {
         releaseButton.addActionListener(e -> {
             if (table.getSelectedRow() != -1) {
                 try {
-                    SimpleDateFormat dtf = new SimpleDateFormat("dd-MM-yyyy");
+                    SimpleDateFormat dtf = new SimpleDateFormat("dd MM yyyy");
                     Calendar cal = Calendar.getInstance();
                     String date = dtf.format(cal.getTime());
+                    String substring = date.substring(3,5);
+                    String month = getMonth(Integer.parseInt(substring));
+                    String substring1 = date.substring(0,2);
+                    String substring2 = date.substring(6,10);
+                    String dateafter = substring1 + " " + month + " " + substring2;
                     String book_name = (String) tablemodel.getValueAt(table.getSelectedRow(), 3);
                     PreparedStatement pt = con.prepareStatement("DELETE FROM borrowedbook WHERE book_name = ?");
                     pt.setString(1, book_name);
                     pt.executeUpdate();
                     pt = con.prepareStatement("UPDATE book SET book_available = ?, book_availabledate = ? WHERE book_name = ?");
                     pt.setBoolean(1, true);
-                    pt.setString(2,date);
+                    pt.setString(2,dateafter);
                     pt.setString(3, book_name);
                     pt.executeUpdate();
                     String message = "Book has been succesfully released!";
@@ -507,33 +521,20 @@ public class StudentBottomPanel extends JPanel {
     }
 
     public String getMonth(int month) {
-        switch (month) {
-            case 1:
-                return "January";
-            case 2:
-                return "February";
-            case 3:
-                return "March";
-            case 4:
-                return  "April";
-            case 5:
-                return "May";
-            case 6:
-                return "June";
-            case 7:
-                return "July";
-            case 8:
-                return "August";
-            case 9:
-                return "September";
-            case 10:
-                return "October";
-            case 11:
-                return "November";
-            case 12:
-                return "December";
-            default:
-                return "lol";
-        }
+        return switch (month) {
+            case 1 -> "January";
+            case 2 -> "February";
+            case 3 -> "March";
+            case 4 -> "April";
+            case 5 -> "May";
+            case 6 -> "June";
+            case 7 -> "July";
+            case 8 -> "August";
+            case 9 -> "September";
+            case 10 -> "October";
+            case 11 -> "November";
+            case 12 -> "December";
+            default -> "lol";
+        };
     }
 }
