@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
@@ -143,7 +144,7 @@ public class StudentBottomPanel extends JPanel {
         borrowButton.addActionListener (e -> {
             if(datePicker1.getModel().getValue() == null || datePicker.getModel().getValue() == null) {
                 String err = "Please select a time slot!";
-                JOptionPane.showMessageDialog(new Frame(),err,"Error",1);
+                JOptionPane.showMessageDialog(new Frame(),err,"Error",0);
             } else {
                 int i = table.getSelectedRow();
                 int i1 = table1.getSelectedRow();
@@ -186,11 +187,11 @@ public class StudentBottomPanel extends JPanel {
                             String finalInfo = info;
 
                             //Start date
-                            JLabel startdate2 = new JLabel("Start date: ");
+                            JLabel startdate2 = new JLabel("Start date:");
                             UtilDateModel model2 = new UtilDateModel();
                             JDatePanelImpl datePanel2 = new JDatePanelImpl(model2);
                             JDatePickerImpl datePicker2 = new JDatePickerImpl(datePanel2);
-                            model.setSelected(true); // Default today's date...
+                            //model2.setSelected(true); // Default today's date...
                             createOrder.add(startdate2);
                             createOrder.add(datePicker2);
 
@@ -199,17 +200,43 @@ public class StudentBottomPanel extends JPanel {
                             UtilDateModel model3 = new UtilDateModel();
                             JDatePanelImpl datePanel3 = new JDatePanelImpl(model3);
                             JDatePickerImpl datePicker3 = new JDatePickerImpl(datePanel3);
-                            model.setSelected(true); // Default today's date...
+                            //model.setSelected(true); // Default today's date...
                             createOrder.add(finishdate3);
                             createOrder.add(datePicker3);
 
                             JButton orderButton = new JButton("Order The Book");
                             createOrder.add(orderButton);
 
+                            String finalInfo1 = info;
                             orderButton.addActionListener(ex -> {
                                 if(datePicker2.getModel().getValue() == null || datePicker3.getModel().getValue() == null) {
                                     String err1 = "Please select a time slot!";
-                                    JOptionPane.showMessageDialog(new JFrame(), err1, "Error",1);
+                                    JOptionPane.showMessageDialog(new JFrame(), err1, "Error", 1);
+                                } else {
+                                    int selectedStartDate1 = datePicker1.getModel().getDay();
+                                    int step = datePicker1.getModel().getMonth();
+                                    String selectedStartDate2 = getMonth(step);
+                                    int selectedStartDate3 = datePicker1.getModel().getYear();
+                                    String start = selectedStartDate1 + " " + selectedStartDate2 + " " + selectedStartDate3;
+
+                                    int selectedFinishDate1 = datePicker2.getModel().getDay();
+                                    int step1 = datePicker2.getModel().getMonth();
+                                    String selectedFinishDate2 = getMonth(step1);
+                                    int selectedFinishDate3 = datePicker2.getModel().getYear();
+                                    String finish = selectedFinishDate1 + " " + selectedFinishDate2 + " " + selectedFinishDate3;
+
+                                    Locale.setDefault(Locale.UK);
+                                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG);
+                                    LocalDate from = LocalDate.parse(start, dateFormatter);
+                                    LocalDate to = LocalDate.parse(finish, dateFormatter);
+                                    long difference = ChronoUnit.DAYS.between(from, to);
+                                     if(difference < 0) {
+                                         String message = "You can not take the book before the available date! Please select another date after " + finalInfo1;
+                                         JOptionPane.showMessageDialog(new JPanel(),message,"Error",0);
+                                     } else {
+                                         // CONT...... //////////////
+
+                                     }
                                 }
                             });
                             createOrder.setSize(600, 150);
@@ -225,16 +252,12 @@ public class StudentBottomPanel extends JPanel {
                         pt.setInt(7, Integer.parseInt((String) table.getValueAt(i, 3)));
                         pt.executeUpdate();
 
-                        Locale.setDefault(Locale.UK);
-                        DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG);
-
                         int selectedStartDate1 = datePicker.getModel().getDay();
                         int step = datePicker.getModel().getMonth();
                         step++;
                         String selectedStartDate2 = getMonth(step);
                         int selectedStartDate3 = datePicker.getModel().getYear();
                         String start = selectedStartDate1 + " " + selectedStartDate2 + " " + selectedStartDate3;
-                        System.out.println(start);
 
                         int selectedFinishDate1 = datePicker1.getModel().getDay();
                         int step1 = datePicker1.getModel().getMonth();
@@ -243,11 +266,6 @@ public class StudentBottomPanel extends JPanel {
                         String selectedFinishDate2 = getMonth(step1);
                         int selectedFinishDate3 = datePicker1.getModel().getYear();
                         String finish = selectedFinishDate1 + " " + selectedFinishDate2 + " " + selectedFinishDate3;
-                        System.out.println(finish);
-
-                        LocalDate from = LocalDate.parse(start, dateFormatter);
-                        LocalDate to = LocalDate.parse(finish, dateFormatter);
-                        //long difference = ChronoUnit.DAYS.between(from, to);
 
                         Connection connection3 = connection.connection();
                         String qq = "UPDATE book SET book_available = ?, book_availabledate = ? WHERE book_name = ?";
