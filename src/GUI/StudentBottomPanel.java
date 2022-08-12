@@ -138,8 +138,43 @@ public class StudentBottomPanel extends JPanel {
         frame.add(datePicker1);
 
         JButton borrowButton = new JButton("Borrow");
+        JButton listOrderButton = new JButton("List Existing Orders");
         frame.add(borrowButton);
+        frame.add(listOrderButton);
         frame.setVisible(true);
+
+        listOrderButton.addActionListener(ex -> {
+            JFrame frame1 = new JFrame("Existing Orders");
+            frame1.setSize(850,475);
+            JPanel panel = new JPanel();
+            try {
+                Connection connection2 = connection.connection();
+                statement = connection2.createStatement();
+                String sqlquery = "SELECT * FROM orderedbook";
+                ResultSet rss = statement.executeQuery(sqlquery);
+                tablemodel = new DefaultTableModel(new String[]{"Student Name", "Student Surname", "Student ID", "Book Name", "Book Author", "Book Publisher", "Book Page Number"},0);
+                while(rss.next()) {
+                    String a = rss.getString("student_name");
+                    String b = rss.getString("student_surname");
+                    String c = rss.getString("student_id");
+                    String d = rss.getString("book_name");
+                    String e = rss.getString("book_author");
+                    String f = rss.getString("book_publisher");
+                    String g = rss.getString("book_pageno");
+                    tablemodel.addRow(new Object[]{a,b,c,d,e,f,g});
+                }
+                table = new JTable(tablemodel);
+                table.setEnabled(false);
+                JScrollPane scrollPane2 = new JScrollPane(table);
+                scrollPane2.setPreferredSize(new Dimension(800,400));
+                panel.add(scrollPane2);
+                frame1.add(panel);
+
+            } catch (SQLException exx) {
+                throw new RuntimeException(exx);
+            }
+            frame1.setVisible(true);
+        });
 
         borrowButton.addActionListener (e -> {
             if(datePicker1.getModel().getValue() == null || datePicker.getModel().getValue() == null) {
